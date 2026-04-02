@@ -7,104 +7,74 @@
 <style>
 body {
   margin: 0;
-  font-family: 'Segoe UI', sans-serif;
+  font-family: Arial;
   display: flex;
   background: #05080f;
   color: #fff;
 }
 
-/* SIDEBAR */
 .sidebar {
   width: 240px;
   background: #0a0f1a;
   height: 100vh;
   padding: 20px;
-  border-right: 1px solid #111;
 }
 
 .logo {
-  font-weight: bold;
   color: #facc15;
-  margin-bottom: 30px;
+  margin-bottom: 20px;
 }
 
 .menu-item {
-  padding: 12px;
-  margin-bottom: 10px;
-  border-radius: 8px;
+  padding: 10px;
   cursor: pointer;
-  color: #94a3b8;
 }
 
-.menu-item.active {
+.menu-item:hover {
   background: #facc15;
   color: #000;
-  font-weight: bold;
 }
 
-/* CONTENT */
 .content {
   flex: 1;
-  padding: 30px;
+  padding: 20px;
 }
 
-/* CARD */
 .card {
   background: #0f172a;
-  border-radius: 12px;
   padding: 20px;
+  border-radius: 10px;
   margin-bottom: 20px;
-  border-left: 4px solid #3b82f6;
 }
 
-.card.yellow { border-left-color: #facc15; }
-.card.red { border-left-color: #ef4444; }
-
-.card h3 {
-  margin-bottom: 15px;
-}
-
-/* INPUTS */
 input {
-  width: 220px;
-  padding: 12px;
+  padding: 10px;
   margin: 5px;
-  border-radius: 8px;
-  border: 1px solid #1e293b;
+  border-radius: 5px;
+  border: none;
   background: #020617;
-  color: #fff;
+  color: white;
 }
 
-/* BUTTON */
 button {
-  padding: 12px 20px;
+  padding: 10px;
   background: #22c55e;
   border: none;
-  border-radius: 8px;
   cursor: pointer;
-  font-weight: bold;
 }
 
-/* GRID */
-.grid {
-  display: flex;
-  flex-wrap: wrap;
-}
-
-/* TABLE */
 table {
   width: 100%;
   border-collapse: collapse;
 }
 
 th, td {
-  padding: 12px;
-  border-bottom: 1px solid #1e293b;
+  padding: 10px;
+  border-bottom: 1px solid #333;
 }
 
 th {
   color: #38bdf8;
-  text-align: left;
 }
 </style>
 </head>
@@ -112,58 +82,67 @@ th {
 <body>
 
 <div class="sidebar">
-  <div class="logo">🚔 ELITE COE</div>
-  <div class="menu-item active">Relatório</div>
-  <div class="menu-item">Viaturas</div>
-  <div class="menu-item">Ranking</div>
+  <div class="logo">🚔 COE</div>
+  <div class="menu-item" onclick="mostrarRelatorio()">Relatório</div>
+  <div class="menu-item" onclick="mostrarRanking()">Ranking Geral</div>
+  <div class="menu-item" onclick="mostrarRankingMensal()">Ranking Mensal</div>
 </div>
 
 <div class="content">
 
+<div id="relatorio">
+
 <div class="card">
-  <h3>Composição da Equipe</h3>
-  <div class="grid">
-    <input id="chefe" placeholder="Chefe da Barca">
-    <input id="p1" placeholder="Motorista P1">
-    <input id="p3" placeholder="Auxiliar P3">
-    <input id="p4" placeholder="Auxiliar P4">
-  </div>
-</div>
-
-<div class="card yellow">
-  <h3>Dados da Ronda</h3>
-  <input id="vtr" placeholder="Viatura">
-  <input type="datetime-local" id="inicio">
-  <input type="datetime-local" id="fim">
-</div>
-
-<div class="card red">
-  <h3>Produtividade</h3>
-  <input placeholder="Veículos">
-  <input placeholder="Drogas">
-  <input placeholder="Armas">
-  <input placeholder="Munições">
+<h3>Equipe</h3>
+<input id="chefe" placeholder="Chefe">
+<input id="p1" placeholder="P1">
+<input id="p3" placeholder="P3">
+<input id="p4" placeholder="P4">
 </div>
 
 <div class="card">
-  <button onclick="salvar()">Salvar Relatório</button>
+<h3>Ronda</h3>
+<input id="vtr" placeholder="VTR">
+<input type="date" id="data">
+<input type="time" id="inicio">
+<input type="time" id="fim">
 </div>
 
 <div class="card">
+<h3>Produtividade</h3>
+<input id="veiculos" type="number" placeholder="Veículos">
+<input id="drogas" type="number" placeholder="Drogas">
+<input id="fuzil" type="number" placeholder="Fuzil">
+<input id="pistola" type="number" placeholder="Pistola">
+<input id="smg" type="number" placeholder="SMG">
+<input id="explosivos" type="number" placeholder="Explosivos">
+<input id="dinheiro" type="number" placeholder="Dinheiro Sujo">
+<input id="municoes" type="number" placeholder="Munições">
+</div>
+
+<button onclick="salvar()">Salvar</button>
+
+</div>
+
+<div id="ranking" style="display:none;">
+<div class="card">
+<h3>🏆 Ranking Geral</h3>
 <table>
-<thead>
-<tr>
-<th>Chefe</th>
-<th>P1</th>
-<th>P3</th>
-<th>P4</th>
-<th>VTR</th>
-<th>Início</th>
-<th>Fim</th>
-</tr>
-</thead>
-<tbody id="tabela"></tbody>
+<thead><tr><th>Chefe</th><th>Pontos</th></tr></thead>
+<tbody id="rankingTabela"></tbody>
 </table>
+</div>
+</div>
+
+<div id="rankingMensal" style="display:none;">
+<div class="card">
+<h3>📅 Ranking Mensal</h3>
+<input type="month" id="mesFiltro" onchange="gerarRankingMensal()">
+<table>
+<thead><tr><th>Chefe</th><th>Pontos</th></tr></thead>
+<tbody id="rankingMensalTabela"></tbody>
+</table>
+</div>
 </div>
 
 </div>
@@ -171,39 +150,114 @@ th {
 <script>
 let dados = JSON.parse(localStorage.getItem("dados")) || [];
 
+// 🔥 CÁLCULO DE PONTOS
+function calcularPontos(d) {
+  return (
+    (d.veiculos * 25) +
+    (d.drogas * 15) +
+    (d.fuzil * 40) +
+    (d.pistola * 10) +
+    (d.smg * 15) +
+    (d.explosivos * 15) +
+    (d.dinheiro * 10) +
+    (d.municoes * 5)
+  );
+}
+
+// 💾 SALVAR
 function salvar() {
-  dados.push({
+  let registro = {
     chefe: chefe.value,
     p1: p1.value,
     p3: p3.value,
     p4: p4.value,
     vtr: vtr.value,
+    data: data.value,
     inicio: inicio.value,
-    fim: fim.value
-  });
+    fim: fim.value,
+    veiculos: Number(veiculos.value || 0),
+    drogas: Number(drogas.value || 0),
+    fuzil: Number(fuzil.value || 0),
+    pistola: Number(pistola.value || 0),
+    smg: Number(smg.value || 0),
+    explosivos: Number(explosivos.value || 0),
+    dinheiro: Number(dinheiro.value || 0),
+    municoes: Number(municoes.value || 0)
+  };
+
+  registro.pontos = calcularPontos(registro);
+
+  dados.push(registro);
 
   localStorage.setItem("dados", JSON.stringify(dados));
-  atualizar();
+
+  gerarRanking();
+  gerarRankingMensal();
+
+  alert("Salvo com sucesso");
 }
 
-function atualizar() {
-  tabela.innerHTML = "";
+// 🏆 RANKING GERAL
+function gerarRanking() {
+  let ranking = {};
+
   dados.forEach(d => {
-    tabela.innerHTML += `
-      <tr>
-        <td>${d.chefe}</td>
-        <td>${d.p1}</td>
-        <td>${d.p3}</td>
-        <td>${d.p4}</td>
-        <td>${d.vtr}</td>
-        <td>${d.inicio}</td>
-        <td>${d.fim}</td>
-      </tr>
-    `;
+    if (!ranking[d.chefe]) ranking[d.chefe] = 0;
+    ranking[d.chefe] += d.pontos;
+  });
+
+  let ordenado = Object.entries(ranking).sort((a,b)=>b[1]-a[1]);
+
+  rankingTabela.innerHTML = "";
+
+  ordenado.forEach(r=>{
+    rankingTabela.innerHTML += `<tr><td>${r[0]}</td><td>${r[1]}</td></tr>`;
   });
 }
 
-atualizar();
+// 📅 RANKING MENSAL
+function gerarRankingMensal() {
+  let mes = mesFiltro.value;
+  if (!mes) return;
+
+  let ranking = {};
+
+  dados.forEach(d => {
+    if (d.data && d.data.startsWith(mes)) {
+      if (!ranking[d.chefe]) ranking[d.chefe] = 0;
+      ranking[d.chefe] += d.pontos;
+    }
+  });
+
+  let ordenado = Object.entries(ranking).sort((a,b)=>b[1]-a[1]);
+
+  rankingMensalTabela.innerHTML = "";
+
+  ordenado.forEach(r=>{
+    rankingMensalTabela.innerHTML += `<tr><td>${r[0]}</td><td>${r[1]}</td></tr>`;
+  });
+}
+
+// 🔄 NAVEGAÇÃO
+function mostrarRelatorio() {
+  relatorio.style.display = "block";
+  ranking.style.display = "none";
+  rankingMensal.style.display = "none";
+}
+
+function mostrarRanking() {
+  relatorio.style.display = "none";
+  ranking.style.display = "block";
+  rankingMensal.style.display = "none";
+}
+
+function mostrarRankingMensal() {
+  relatorio.style.display = "none";
+  ranking.style.display = "none";
+  rankingMensal.style.display = "block";
+}
+
+gerarRanking();
 </script>
 
 </body>
