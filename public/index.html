@@ -1,85 +1,137 @@
 <!DOCTYPE html>
-<html>
+<html lang="pt-br">
 <head>
 <meta charset="UTF-8">
-<title>COE - Relatório de Ronda</title>
+<title>COE Sistema</title>
 
 <style>
 body {
   margin: 0;
   font-family: Arial;
-  background: #0a192f;
+  display: flex;
+  background: #0b0f19;
   color: #fff;
 }
 
-header {
-  background: #020c1b;
-  padding: 15px;
-  text-align: center;
-  border-bottom: 2px solid #00bfff;
-}
-
-.container {
+/* MENU */
+.sidebar {
+  width: 220px;
+  background: #070b14;
+  height: 100vh;
   padding: 20px;
 }
 
-.form {
-  background: #112240;
-  padding: 15px;
-  border-radius: 10px;
+.sidebar h2 {
+  color: #facc15;
 }
 
+.menu-item {
+  margin: 15px 0;
+  padding: 10px;
+  cursor: pointer;
+}
+
+.menu-item.active {
+  background: #facc15;
+  color: black;
+  border-radius: 5px;
+}
+
+/* CONTEUDO */
+.content {
+  flex: 1;
+  padding: 20px;
+}
+
+/* CARD */
+.card {
+  background: #111827;
+  padding: 20px;
+  border-radius: 10px;
+  margin-bottom: 20px;
+}
+
+.card h3 {
+  margin-bottom: 10px;
+}
+
+/* INPUT */
 input {
-  padding: 8px;
+  padding: 10px;
   margin: 5px;
   border-radius: 5px;
   border: none;
+  background: #020617;
+  color: white;
 }
 
 button {
   padding: 10px;
-  background: #00bfff;
+  background: #facc15;
   border: none;
   cursor: pointer;
 }
 
+/* GRID */
+.grid {
+  display: flex;
+  flex-wrap: wrap;
+}
+
+.grid input {
+  flex: 1 1 200px;
+}
+
+/* TABELA */
 table {
   width: 100%;
-  margin-top: 20px;
   border-collapse: collapse;
 }
 
 th, td {
   padding: 10px;
-  border-bottom: 1px solid #233554;
+  border-bottom: 1px solid #333;
 }
 
 th {
-  color: #00bfff;
+  color: #facc15;
 }
 </style>
 </head>
 
 <body>
 
-<header>🚔 4º BPChq COE - Relatório de Ronda</header>
-
-<div class="container">
-
-<div class="form">
-  <input id="chefe" placeholder="Chefe da Barca">
-  <input id="p1" placeholder="P1">
-  <input id="p3" placeholder="P3">
-  <input id="p4" placeholder="P4">
-  <input id="vtr" placeholder="VTR"><br>
-
-  <input type="date" id="data">
-  <input type="time" id="inicio">
-  <input type="time" id="fim">
-
-  <button onclick="salvar()">Salvar</button>
+<div class="sidebar">
+  <h2>🚔 COE</h2>
+  <div class="menu-item active">Relatório</div>
+  <div class="menu-item">Viaturas</div>
+  <div class="menu-item">Ranking</div>
 </div>
 
+<div class="content">
+
+<div class="card">
+  <h3>Composição da Equipe</h3>
+  <div class="grid">
+    <input id="chefe" placeholder="Chefe da Barca">
+    <input id="p1" placeholder="P1">
+    <input id="p3" placeholder="P3">
+    <input id="p4" placeholder="P4">
+  </div>
+</div>
+
+<div class="card">
+  <h3>Dados da Ronda</h3>
+  <input id="vtr" placeholder="VTR">
+  <input type="datetime-local" id="inicio">
+  <input type="datetime-local" id="fim">
+</div>
+
+<div class="card">
+  <button onclick="salvar()">Salvar Relatório</button>
+</div>
+
+<div class="card">
 <table>
 <thead>
 <tr>
@@ -88,18 +140,18 @@ th {
 <th>P3</th>
 <th>P4</th>
 <th>VTR</th>
-<th>Data</th>
 <th>Início</th>
 <th>Fim</th>
 </tr>
 </thead>
 <tbody id="tabela"></tbody>
 </table>
+</div>
 
 </div>
 
 <script>
-let dados = [];
+let dados = JSON.parse(localStorage.getItem("dados")) || [];
 
 function salvar() {
   dados.push({
@@ -108,17 +160,16 @@ function salvar() {
     p3: p3.value,
     p4: p4.value,
     vtr: vtr.value,
-    data: data.value,
     inicio: inicio.value,
     fim: fim.value
   });
 
+  localStorage.setItem("dados", JSON.stringify(dados));
   atualizar();
 }
 
 function atualizar() {
   tabela.innerHTML = "";
-
   dados.forEach(d => {
     tabela.innerHTML += `
       <tr>
@@ -127,13 +178,14 @@ function atualizar() {
         <td>${d.p3}</td>
         <td>${d.p4}</td>
         <td>${d.vtr}</td>
-        <td>${d.data}</td>
         <td>${d.inicio}</td>
         <td>${d.fim}</td>
       </tr>
     `;
   });
 }
+
+atualizar();
 </script>
 
 </body>
