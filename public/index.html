@@ -1,1 +1,140 @@
-<h1>Funcionando 🚔</h1>
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<title>COE - Relatório de Ronda</title>
+
+<style>
+body {
+  margin: 0;
+  font-family: Arial;
+  background: #0a192f;
+  color: #fff;
+}
+
+header {
+  background: #020c1b;
+  padding: 15px;
+  text-align: center;
+  border-bottom: 2px solid #00bfff;
+}
+
+.container {
+  padding: 20px;
+}
+
+.form {
+  background: #112240;
+  padding: 15px;
+  border-radius: 10px;
+}
+
+input {
+  padding: 8px;
+  margin: 5px;
+  border-radius: 5px;
+  border: none;
+}
+
+button {
+  padding: 10px;
+  background: #00bfff;
+  border: none;
+  cursor: pointer;
+}
+
+table {
+  width: 100%;
+  margin-top: 20px;
+  border-collapse: collapse;
+}
+
+th, td {
+  padding: 10px;
+  border-bottom: 1px solid #233554;
+}
+
+th {
+  color: #00bfff;
+}
+</style>
+</head>
+
+<body>
+
+<header>🚔 4º BPChq COE - Relatório de Ronda</header>
+
+<div class="container">
+
+<div class="form">
+  <input id="chefe" placeholder="Chefe da Barca">
+  <input id="p1" placeholder="P1">
+  <input id="p3" placeholder="P3">
+  <input id="p4" placeholder="P4">
+  <input id="vtr" placeholder="VTR"><br>
+
+  <input type="date" id="data">
+  <input type="time" id="inicio">
+  <input type="time" id="fim">
+
+  <button onclick="salvar()">Salvar</button>
+</div>
+
+<table>
+<thead>
+<tr>
+<th>Chefe</th>
+<th>P1</th>
+<th>P3</th>
+<th>P4</th>
+<th>VTR</th>
+<th>Data</th>
+<th>Início</th>
+<th>Fim</th>
+</tr>
+</thead>
+<tbody id="tabela"></tbody>
+</table>
+
+</div>
+
+<script>
+let dados = [];
+
+function salvar() {
+  dados.push({
+    chefe: chefe.value,
+    p1: p1.value,
+    p3: p3.value,
+    p4: p4.value,
+    vtr: vtr.value,
+    data: data.value,
+    inicio: inicio.value,
+    fim: fim.value
+  });
+
+  atualizar();
+}
+
+function atualizar() {
+  tabela.innerHTML = "";
+
+  dados.forEach(d => {
+    tabela.innerHTML += `
+      <tr>
+        <td>${d.chefe}</td>
+        <td>${d.p1}</td>
+        <td>${d.p3}</td>
+        <td>${d.p4}</td>
+        <td>${d.vtr}</td>
+        <td>${d.data}</td>
+        <td>${d.inicio}</td>
+        <td>${d.fim}</td>
+      </tr>
+    `;
+  });
+}
+</script>
+
+</body>
+</html>
