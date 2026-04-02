@@ -57,11 +57,8 @@ body {
   gap: 10px;
 }
 
-.grid input {
+.grid input, select {
   flex: 1 1 180px;
-}
-
-input {
   padding: 10px;
   border-radius: 5px;
   border: none;
@@ -79,16 +76,14 @@ button {
   margin-top: 10px;
 }
 
-.reset-btn {
-  background: #ef4444;
-}
+.reset-btn { background: #ef4444; }
+.delete-btn { background: #ef4444; }
 
 table {
   width: 100%;
   border-collapse: collapse;
   background: #020617;
   border-radius: 10px;
-  overflow: hidden;
 }
 
 th, td {
@@ -97,13 +92,9 @@ th, td {
   border-bottom: 1px solid #1e293b;
 }
 
-th {
-  color: #38bdf8;
-}
+th { color: #38bdf8; }
 
-tr:hover {
-  background: #0f172a;
-}
+tr:hover { background: #0f172a; }
 </style>
 </head>
 
@@ -112,8 +103,9 @@ tr:hover {
 <div class="sidebar">
   <div class="logo">🚔 COE</div>
   <div class="menu-item" onclick="mostrarRelatorio()">Relatório</div>
-  <div class="menu-item" onclick="mostrarRanking()">Ranking Geral</div>
+  <div class="menu-item" onclick="mostrarRanking()">Ranking</div>
   <div class="menu-item" onclick="mostrarRankingMensal()">Ranking Mensal</div>
+  <div class="menu-item" onclick="mostrarCadastro()">Cadastro</div>
 </div>
 
 <div class="content">
@@ -124,10 +116,10 @@ tr:hover {
 <div class="card">
 <h3>Equipe</h3>
 <div class="grid">
-<input id="chefe" placeholder="Chefe">
-<input id="p1" placeholder="P1">
-<input id="p3" placeholder="P3">
-<input id="p4" placeholder="P4">
+<select id="chefeSelect"></select>
+<select id="p1Select"></select>
+<select id="p3Select"></select>
+<select id="p4Select"></select>
 </div>
 </div>
 
@@ -162,43 +154,55 @@ tr:hover {
 
 <!-- RANKING -->
 <div id="ranking" style="display:none;">
-
 <div class="card">
-<h3>🏆 Ranking Geral</h3>
+<h3>🏆 Ranking</h3>
 <table>
 <thead>
-<tr>
-<th>Posição</th>
-<th>Chefe</th>
-<th>Pontos</th>
-</tr>
+<tr><th>Posição</th><th>Chefe</th><th>Pontos</th></tr>
 </thead>
 <tbody id="rankingTabela"></tbody>
 </table>
 </div>
 
 <div class="card">
-<h3>📊 Desempenho</h3>
+<h3>📊 Gráfico</h3>
 <canvas id="grafico"></canvas>
 </div>
-
 </div>
 
 <!-- RANKING MENSAL -->
 <div id="rankingMensal" style="display:none;">
 <div class="card">
-<h3>📅 Ranking Mensal</h3>
+<h3>Ranking Mensal</h3>
 <input type="month" id="mesFiltro" onchange="gerarRankingMensal()">
 <table>
 <thead>
-<tr>
-<th>Posição</th>
-<th>Chefe</th>
-<th>Pontos</th>
-</tr>
+<tr><th>Posição</th><th>Chefe</th><th>Pontos</th></tr>
 </thead>
 <tbody id="rankingMensalTabela"></tbody>
 </table>
+</div>
+</div>
+
+<!-- CADASTRO -->
+<div id="cadastro" style="display:none;">
+<div class="card">
+<h3>Cadastro de Policiais</h3>
+
+<div class="grid">
+<input id="nomePolicial" placeholder="Nome">
+<input id="rgPolicial" placeholder="RG">
+</div>
+
+<button onclick="cadastrarPolicial()">Cadastrar</button>
+
+<table>
+<thead>
+<tr><th>Nome</th><th>RG</th><th>Ação</th></tr>
+</thead>
+<tbody id="listaPoliciais"></tbody>
+</table>
+
 </div>
 </div>
 
@@ -206,183 +210,208 @@ tr:hover {
 
 <script>
 let dados = JSON.parse(localStorage.getItem("dados")) || [];
+let policiais = JSON.parse(localStorage.getItem("policiais")) || [];
 let grafico;
+
+/* CADASTRO */
+function cadastrarPolicial() {
+  if (!nomePolicial.value || !rgPolicial.value) return;
+
+  if (policiais.some(p => p.rg === rgPolicial.value)) {
+    alert("RG já existe");
+    return;
+  }
+
+  policiais.push({
+    nome: nomePolicial.value,
+    rg: rgPolicial.value
+  });
+
+  localStorage.setItem("policiais", JSON.stringify(policiais));
+
+  atualizarPoliciais();
+  atualizarSelects();
+
+  nomePolicial.value="";
+  rgPolicial.value="";
+}
+
+/* EXCLUIR */
+function excluirPolicial(rg) {
+  policiais = policiais.filter(p => p.rg !== rg);
+  localStorage.setItem("policiais", JSON.stringify(policiais));
+
+  atualizarPoliciais();
+  atualizarSelects();
+}
+
+/* LISTAR */
+function atualizarPoliciais() {
+  listaPoliciais.innerHTML="";
+
+  policiais.forEach(p=>{
+    listaPoliciais.innerHTML += `
+      <tr>
+        <td>${p.nome}</td>
+        <td>${p.rg}</td>
+        <td><button class="delete-btn" onclick="excluirPolicial('${p.rg}')">Excluir</button></td>
+      </tr>
+    `;
+  });
+}
+
+/* SELECT */
+function atualizarSelects() {
+  let selects = [chefeSelect, p1Select, p3Select, p4Select];
+
+  selects.forEach(s => {
+    s.innerHTML = "<option value=''>Selecionar</option>";
+    policiais.forEach(p => {
+      s.innerHTML += `<option value="${p.nome}">${p.nome} (${p.rg})</option>`;
+    });
+  });
+}
 
 /* PONTOS */
 function calcularPontos(d) {
   return (
-    (d.veiculos * 10) +
-    (d.drogas * 2) +
-    (d.fuzil * 20) +
-    (d.pistola * 5) +
-    (d.smg * 10) +
-    (d.explosivos * 5) +
-    (d.dinheiro * 0.20) +
-    (d.municoes * 1)
+    d.veiculos*25 +
+    d.drogas*15 +
+    d.fuzil*40 +
+    d.pistola*10 +
+    d.smg*15 +
+    d.explosivos*15 +
+    d.dinheiro*0.2 +
+    d.municoes*5
   );
 }
 
 /* SALVAR */
 function salvar() {
-  if (!chefe.value) {
-    alert("Preencha o Chefe");
-    return;
-  }
+  if (!chefeSelect.value) return alert("Selecione o chefe");
 
-  let registro = {
-    chefe: chefe.value,
-    p1: p1.value,
-    p3: p3.value,
-    p4: p4.value,
-    vtr: vtr.value,
+  let r = {
+    chefe: chefeSelect.value,
     data: data.value,
-    inicio: inicio.value,
-    fim: fim.value,
-    veiculos: Number(veiculos.value || 0),
-    drogas: Number(drogas.value || 0),
-    fuzil: Number(fuzil.value || 0),
-    pistola: Number(pistola.value || 0),
-    smg: Number(smg.value || 0),
-    explosivos: Number(explosivos.value || 0),
-    dinheiro: Number(dinheiro.value || 0),
-    municoes: Number(municoes.value || 0)
+    veiculos:+veiculos.value||0,
+    drogas:+drogas.value||0,
+    fuzil:+fuzil.value||0,
+    pistola:+pistola.value||0,
+    smg:+smg.value||0,
+    explosivos:+explosivos.value||0,
+    dinheiro:+dinheiro.value||0,
+    municoes:+municoes.value||0
   };
 
-  registro.pontos = calcularPontos(registro);
+  r.pontos = calcularPontos(r);
 
-  dados.push(registro);
+  dados.push(r);
   localStorage.setItem("dados", JSON.stringify(dados));
 
-  limparCampos();
   gerarRanking();
   gerarRankingMensal();
-
-  alert("Relatório salvo 🚔");
 }
 
-/* LIMPAR */
-function limparCampos() {
-  document.querySelectorAll("input").forEach(i => i.value = "");
-}
-
-/* RESET COM SENHA */
+/* RESET */
 function resetarDados() {
-  let senha = prompt("Digite a senha para resetar:");
-  
+  let senha = prompt("Senha:");
   if (senha === "1234") {
-    if (confirm("Tem certeza que deseja apagar tudo?")) {
-      localStorage.removeItem("dados");
-      dados = [];
-      gerarRanking();
-      gerarRankingMensal();
-      alert("Sistema resetado 🚨");
-    }
+    localStorage.clear();
+    dados=[];
+    policiais=[];
+    atualizarPoliciais();
+    atualizarSelects();
+    gerarRanking();
+    alert("Resetado");
   } else {
-    alert("Senha incorreta ❌");
+    alert("Senha incorreta");
   }
 }
 
 /* RANKING */
 function gerarRanking() {
-  let ranking = {};
-
-  dados.forEach(d => {
-    if (!ranking[d.chefe]) ranking[d.chefe] = 0;
-    ranking[d.chefe] += d.pontos;
+  let r = {};
+  dados.forEach(d=>{
+    if(!r[d.chefe]) r[d.chefe]=0;
+    r[d.chefe]+=d.pontos;
   });
 
-  let ordenado = Object.entries(ranking).sort((a,b)=>b[1]-a[1]);
+  let ord = Object.entries(r).sort((a,b)=>b[1]-a[1]);
 
-  rankingTabela.innerHTML = "";
+  rankingTabela.innerHTML="";
 
-  ordenado.forEach((r, i)=>{
-    let medalha = "";
-    if (i===0) medalha="🥇";
-    else if (i===1) medalha="🥈";
-    else if (i===2) medalha="🥉";
-
-    rankingTabela.innerHTML += `
-      <tr>
-        <td>${medalha} ${i+1}º</td>
-        <td>${r[0]}</td>
-        <td>${r[1]}</td>
-      </tr>
-    `;
+  ord.forEach((e,i)=>{
+    let m = i==0?"🥇":i==1?"🥈":i==2?"🥉":"";
+    rankingTabela.innerHTML += `<tr><td>${m} ${i+1}</td><td>${e[0]}</td><td>${e[1]}</td></tr>`;
   });
 
-  gerarGrafico(ordenado);
+  gerarGrafico(ord);
 }
 
 /* GRAFICO */
 function gerarGrafico(lista) {
-  let nomes = lista.map(d=>d[0]);
-  let pontos = lista.map(d=>d[1]);
+  let nomes = lista.map(x=>x[0]);
+  let pontos = lista.map(x=>x[1]);
 
   if (grafico) grafico.destroy();
 
-  grafico = new Chart(document.getElementById("grafico"), {
-    type: "bar",
-    data: {
-      labels: nomes,
-      datasets: [{
-        data: pontos
-      }]
-    },
-    options: {
-      plugins: { legend: { display:false } }
-    }
+  grafico = new Chart(grafico=document.getElementById("grafico"),{
+    type:"bar",
+    data:{labels:nomes,datasets:[{data:pontos}]},
+    options:{plugins:{legend:{display:false}}}
   });
 }
 
-/* RANKING MENSAL */
+/* MENSAL */
 function gerarRankingMensal() {
   let mes = mesFiltro.value;
-  if (!mes) return;
+  if(!mes) return;
 
-  let ranking = {};
-
-  dados.forEach(d => {
-    if (d.data && d.data.startsWith(mes)) {
-      if (!ranking[d.chefe]) ranking[d.chefe] = 0;
-      ranking[d.chefe] += d.pontos;
+  let r={};
+  dados.forEach(d=>{
+    if(d.data && d.data.startsWith(mes)){
+      if(!r[d.chefe]) r[d.chefe]=0;
+      r[d.chefe]+=d.pontos;
     }
   });
 
-  let ordenado = Object.entries(ranking).sort((a,b)=>b[1]-a[1]);
+  let ord=Object.entries(r).sort((a,b)=>b[1]-a[1]);
 
-  rankingMensalTabela.innerHTML = "";
-
-  ordenado.forEach((r, i)=>{
-    rankingMensalTabela.innerHTML += `
-      <tr>
-        <td>${i+1}º</td>
-        <td>${r[0]}</td>
-        <td>${r[1]}</td>
-      </tr>
-    `;
+  rankingMensalTabela.innerHTML="";
+  ord.forEach((e,i)=>{
+    rankingMensalTabela.innerHTML += `<tr><td>${i+1}</td><td>${e[0]}</td><td>${e[1]}</td></tr>`;
   });
 }
 
-/* NAVEGAÇÃO */
-function mostrarRelatorio() {
+/* NAV */
+function mostrarRelatorio(){
   relatorio.style.display="block";
   ranking.style.display="none";
   rankingMensal.style.display="none";
+  cadastro.style.display="none";
 }
-
-function mostrarRanking() {
+function mostrarRanking(){
   relatorio.style.display="none";
   ranking.style.display="block";
   rankingMensal.style.display="none";
+  cadastro.style.display="none";
 }
-
-function mostrarRankingMensal() {
+function mostrarRankingMensal(){
   relatorio.style.display="none";
   ranking.style.display="none";
   rankingMensal.style.display="block";
+  cadastro.style.display="none";
+}
+function mostrarCadastro(){
+  relatorio.style.display="none";
+  ranking.style.display="none";
+  rankingMensal.style.display="none";
+  cadastro.style.display="block";
 }
 
-/* INICIO */
+/* INIT */
+atualizarPoliciais();
+atualizarSelects();
 gerarRanking();
 </script>
 
