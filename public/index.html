@@ -2,74 +2,87 @@
 <html lang="pt-br">
 <head>
 <meta charset="UTF-8">
-<title>COE Sistema</title>
+<title>COE Sistema Profissional</title>
 
 <style>
 body {
   margin: 0;
-  font-family: Arial;
+  font-family: 'Segoe UI', sans-serif;
   display: flex;
-  background: #0b0f19;
+  background: #05080f;
   color: #fff;
 }
 
-/* MENU */
+/* SIDEBAR */
 .sidebar {
-  width: 220px;
-  background: #070b14;
+  width: 240px;
+  background: #0a0f1a;
   height: 100vh;
   padding: 20px;
+  border-right: 1px solid #111;
 }
 
-.sidebar h2 {
+.logo {
+  font-weight: bold;
   color: #facc15;
+  margin-bottom: 30px;
 }
 
 .menu-item {
-  margin: 15px 0;
-  padding: 10px;
+  padding: 12px;
+  margin-bottom: 10px;
+  border-radius: 8px;
   cursor: pointer;
+  color: #94a3b8;
 }
 
 .menu-item.active {
   background: #facc15;
-  color: black;
-  border-radius: 5px;
+  color: #000;
+  font-weight: bold;
 }
 
-/* CONTEUDO */
+/* CONTENT */
 .content {
   flex: 1;
-  padding: 20px;
+  padding: 30px;
 }
 
 /* CARD */
 .card {
-  background: #111827;
+  background: #0f172a;
+  border-radius: 12px;
   padding: 20px;
-  border-radius: 10px;
   margin-bottom: 20px;
+  border-left: 4px solid #3b82f6;
 }
+
+.card.yellow { border-left-color: #facc15; }
+.card.red { border-left-color: #ef4444; }
 
 .card h3 {
-  margin-bottom: 10px;
+  margin-bottom: 15px;
 }
 
-/* INPUT */
+/* INPUTS */
 input {
-  padding: 10px;
+  width: 220px;
+  padding: 12px;
   margin: 5px;
-  border-radius: 5px;
-  border: none;
+  border-radius: 8px;
+  border: 1px solid #1e293b;
   background: #020617;
-  color: white;
+  color: #fff;
 }
 
+/* BUTTON */
 button {
-  padding: 10px;
-  background: #facc15;
+  padding: 12px 20px;
+  background: #22c55e;
   border: none;
+  border-radius: 8px;
   cursor: pointer;
+  font-weight: bold;
 }
 
 /* GRID */
@@ -78,23 +91,20 @@ button {
   flex-wrap: wrap;
 }
 
-.grid input {
-  flex: 1 1 200px;
-}
-
-/* TABELA */
+/* TABLE */
 table {
   width: 100%;
   border-collapse: collapse;
 }
 
 th, td {
-  padding: 10px;
-  border-bottom: 1px solid #333;
+  padding: 12px;
+  border-bottom: 1px solid #1e293b;
 }
 
 th {
-  color: #facc15;
+  color: #38bdf8;
+  text-align: left;
 }
 </style>
 </head>
@@ -102,7 +112,7 @@ th {
 <body>
 
 <div class="sidebar">
-  <h2>🚔 COE</h2>
+  <div class="logo">🚔 ELITE COE</div>
   <div class="menu-item active">Relatório</div>
   <div class="menu-item">Viaturas</div>
   <div class="menu-item">Ranking</div>
@@ -114,17 +124,25 @@ th {
   <h3>Composição da Equipe</h3>
   <div class="grid">
     <input id="chefe" placeholder="Chefe da Barca">
-    <input id="p1" placeholder="P1">
-    <input id="p3" placeholder="P3">
-    <input id="p4" placeholder="P4">
+    <input id="p1" placeholder="Motorista P1">
+    <input id="p3" placeholder="Auxiliar P3">
+    <input id="p4" placeholder="Auxiliar P4">
   </div>
 </div>
 
-<div class="card">
+<div class="card yellow">
   <h3>Dados da Ronda</h3>
-  <input id="vtr" placeholder="VTR">
+  <input id="vtr" placeholder="Viatura">
   <input type="datetime-local" id="inicio">
   <input type="datetime-local" id="fim">
+</div>
+
+<div class="card red">
+  <h3>Produtividade</h3>
+  <input placeholder="Veículos">
+  <input placeholder="Drogas">
+  <input placeholder="Armas">
+  <input placeholder="Munições">
 </div>
 
 <div class="card">
