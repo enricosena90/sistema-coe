@@ -13,7 +13,6 @@ body {
   color: #fff;
 }
 
-/* SIDEBAR */
 .sidebar {
   width: 240px;
   background: #0a0f1a;
@@ -38,13 +37,11 @@ body {
   color: #000;
 }
 
-/* CONTEUDO */
 .content {
   flex: 1;
   padding: 20px;
 }
 
-/* CARD */
 .card {
   background: #0f172a;
   padding: 20px;
@@ -52,7 +49,6 @@ body {
   margin-bottom: 20px;
 }
 
-/* GRID INPUTS */
 .grid {
   display: flex;
   flex-wrap: wrap;
@@ -63,7 +59,6 @@ body {
   flex: 1 1 180px;
 }
 
-/* INPUT */
 input {
   padding: 10px;
   border-radius: 5px;
@@ -72,7 +67,6 @@ input {
   color: white;
 }
 
-/* BOTÃO */
 button {
   padding: 10px 15px;
   background: #22c55e;
@@ -80,9 +74,13 @@ button {
   cursor: pointer;
   border-radius: 5px;
   font-weight: bold;
+  margin-top: 10px;
 }
 
-/* TABELA */
+.reset-btn {
+  background: #ef4444;
+}
+
 table {
   width: 100%;
   border-collapse: collapse;
@@ -100,7 +98,6 @@ th, td {
 th {
   background: #020617;
   color: #38bdf8;
-  font-weight: bold;
 }
 
 tr:hover {
@@ -120,7 +117,6 @@ tr:hover {
 
 <div class="content">
 
-<!-- RELATORIO -->
 <div id="relatorio">
 
 <div class="card">
@@ -158,10 +154,10 @@ tr:hover {
 </div>
 
 <button onclick="salvar()">Salvar Relatório</button>
+<button onclick="resetarDados()" class="reset-btn">🗑️ Resetar Sistema</button>
 
 </div>
 
-<!-- RANKING GERAL -->
 <div id="ranking" style="display:none;">
 <div class="card">
 <h3>🏆 Ranking Geral</h3>
@@ -178,7 +174,6 @@ tr:hover {
 </div>
 </div>
 
-<!-- RANKING MENSAL -->
 <div id="rankingMensal" style="display:none;">
 <div class="card">
 <h3>📅 Ranking Mensal</h3>
@@ -201,7 +196,6 @@ tr:hover {
 <script>
 let dados = JSON.parse(localStorage.getItem("dados")) || [];
 
-/* PONTOS */
 function calcularPontos(d) {
   return (
     (d.veiculos * 25) +
@@ -210,12 +204,11 @@ function calcularPontos(d) {
     (d.pistola * 10) +
     (d.smg * 15) +
     (d.explosivos * 15) +
-    (d.dinheiro * 0,20) +
+    (d.dinheiro * 10) +
     (d.municoes * 5)
   );
 }
 
-/* SALVAR */
 function salvar() {
   if (!chefe.value) {
     alert("Preencha o Chefe");
@@ -254,12 +247,20 @@ function salvar() {
   alert("Relatório salvo 🚔");
 }
 
-/* LIMPAR */
 function limparCampos() {
   document.querySelectorAll("input").forEach(i => i.value = "");
 }
 
-/* RANKING GERAL */
+function resetarDados() {
+  if (confirm("Tem certeza que deseja apagar TODOS os dados?")) {
+    localStorage.removeItem("dados");
+    dados = [];
+    gerarRanking();
+    gerarRankingMensal();
+    alert("Sistema resetado 🚨");
+  }
+}
+
 function gerarRanking() {
   let ranking = {};
 
@@ -283,7 +284,6 @@ function gerarRanking() {
   });
 }
 
-/* RANKING MENSAL */
 function gerarRankingMensal() {
   let mes = mesFiltro.value;
   if (!mes) return;
@@ -312,7 +312,6 @@ function gerarRankingMensal() {
   });
 }
 
-/* NAVEGAÇÃO */
 function mostrarRelatorio() {
   relatorio.style.display = "block";
   ranking.style.display = "none";
@@ -331,7 +330,6 @@ function mostrarRankingMensal() {
   rankingMensal.style.display = "block";
 }
 
-/* INICIAR */
 gerarRanking();
 </script>
 
