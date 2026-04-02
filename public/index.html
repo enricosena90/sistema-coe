@@ -2,7 +2,7 @@
 <html lang="pt-br">
 <head>
 <meta charset="UTF-8">
-<title>COE Sistema Profissional</title>
+<title>COE Sistema</title>
 
 <style>
 body {
@@ -13,6 +13,7 @@ body {
   color: #fff;
 }
 
+/* SIDEBAR */
 .sidebar {
   width: 240px;
   background: #0a0f1a;
@@ -23,11 +24,13 @@ body {
 .logo {
   color: #facc15;
   margin-bottom: 20px;
+  font-weight: bold;
 }
 
 .menu-item {
   padding: 10px;
   cursor: pointer;
+  border-radius: 5px;
 }
 
 .menu-item:hover {
@@ -35,11 +38,13 @@ body {
   color: #000;
 }
 
+/* CONTEUDO */
 .content {
   flex: 1;
   padding: 20px;
 }
 
+/* CARD */
 .card {
   background: #0f172a;
   padding: 20px;
@@ -47,34 +52,59 @@ body {
   margin-bottom: 20px;
 }
 
+/* GRID INPUTS */
+.grid {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+
+.grid input {
+  flex: 1 1 180px;
+}
+
+/* INPUT */
 input {
   padding: 10px;
-  margin: 5px;
   border-radius: 5px;
   border: none;
   background: #020617;
   color: white;
 }
 
+/* BOTÃO */
 button {
-  padding: 10px;
+  padding: 10px 15px;
   background: #22c55e;
   border: none;
   cursor: pointer;
+  border-radius: 5px;
+  font-weight: bold;
 }
 
+/* TABELA */
 table {
   width: 100%;
   border-collapse: collapse;
+  background: #020617;
+  border-radius: 10px;
+  overflow: hidden;
 }
 
 th, td {
-  padding: 10px;
-  border-bottom: 1px solid #333;
+  padding: 12px;
+  text-align: center;
+  border-bottom: 1px solid #1e293b;
 }
 
 th {
+  background: #020617;
   color: #38bdf8;
+  font-weight: bold;
+}
+
+tr:hover {
+  background: #0f172a;
 }
 </style>
 </head>
@@ -90,26 +120,32 @@ th {
 
 <div class="content">
 
+<!-- RELATORIO -->
 <div id="relatorio">
 
 <div class="card">
 <h3>Equipe</h3>
+<div class="grid">
 <input id="chefe" placeholder="Chefe">
 <input id="p1" placeholder="P1">
 <input id="p3" placeholder="P3">
 <input id="p4" placeholder="P4">
 </div>
+</div>
 
 <div class="card">
 <h3>Ronda</h3>
+<div class="grid">
 <input id="vtr" placeholder="VTR">
 <input type="date" id="data">
 <input type="time" id="inicio">
 <input type="time" id="fim">
 </div>
+</div>
 
 <div class="card">
 <h3>Produtividade</h3>
+<div class="grid">
 <input id="veiculos" type="number" placeholder="Veículos">
 <input id="drogas" type="number" placeholder="Drogas">
 <input id="fuzil" type="number" placeholder="Fuzil">
@@ -119,27 +155,42 @@ th {
 <input id="dinheiro" type="number" placeholder="Dinheiro Sujo">
 <input id="municoes" type="number" placeholder="Munições">
 </div>
+</div>
 
-<button onclick="salvar()">Salvar</button>
+<button onclick="salvar()">Salvar Relatório</button>
 
 </div>
 
+<!-- RANKING GERAL -->
 <div id="ranking" style="display:none;">
 <div class="card">
 <h3>🏆 Ranking Geral</h3>
 <table>
-<thead><tr><th>Chefe</th><th>Pontos</th></tr></thead>
+<thead>
+<tr>
+<th>Posição</th>
+<th>Chefe</th>
+<th>Pontos</th>
+</tr>
+</thead>
 <tbody id="rankingTabela"></tbody>
 </table>
 </div>
 </div>
 
+<!-- RANKING MENSAL -->
 <div id="rankingMensal" style="display:none;">
 <div class="card">
 <h3>📅 Ranking Mensal</h3>
 <input type="month" id="mesFiltro" onchange="gerarRankingMensal()">
 <table>
-<thead><tr><th>Chefe</th><th>Pontos</th></tr></thead>
+<thead>
+<tr>
+<th>Posição</th>
+<th>Chefe</th>
+<th>Pontos</th>
+</tr>
+</thead>
 <tbody id="rankingMensalTabela"></tbody>
 </table>
 </div>
@@ -150,7 +201,7 @@ th {
 <script>
 let dados = JSON.parse(localStorage.getItem("dados")) || [];
 
-// 🔥 CÁLCULO DE PONTOS
+/* PONTOS */
 function calcularPontos(d) {
   return (
     (d.veiculos * 25) +
@@ -164,8 +215,13 @@ function calcularPontos(d) {
   );
 }
 
-// 💾 SALVAR
+/* SALVAR */
 function salvar() {
+  if (!chefe.value) {
+    alert("Preencha o Chefe");
+    return;
+  }
+
   let registro = {
     chefe: chefe.value,
     p1: p1.value,
@@ -191,13 +247,19 @@ function salvar() {
 
   localStorage.setItem("dados", JSON.stringify(dados));
 
+  limparCampos();
   gerarRanking();
   gerarRankingMensal();
 
-  alert("Salvo com sucesso");
+  alert("Relatório salvo 🚔");
 }
 
-// 🏆 RANKING GERAL
+/* LIMPAR */
+function limparCampos() {
+  document.querySelectorAll("input").forEach(i => i.value = "");
+}
+
+/* RANKING GERAL */
 function gerarRanking() {
   let ranking = {};
 
@@ -210,12 +272,18 @@ function gerarRanking() {
 
   rankingTabela.innerHTML = "";
 
-  ordenado.forEach(r=>{
-    rankingTabela.innerHTML += `<tr><td>${r[0]}</td><td>${r[1]}</td></tr>`;
+  ordenado.forEach((r, i)=>{
+    rankingTabela.innerHTML += `
+      <tr>
+        <td>${i+1}º</td>
+        <td>${r[0]}</td>
+        <td>${r[1]}</td>
+      </tr>
+    `;
   });
 }
 
-// 📅 RANKING MENSAL
+/* RANKING MENSAL */
 function gerarRankingMensal() {
   let mes = mesFiltro.value;
   if (!mes) return;
@@ -233,12 +301,18 @@ function gerarRankingMensal() {
 
   rankingMensalTabela.innerHTML = "";
 
-  ordenado.forEach(r=>{
-    rankingMensalTabela.innerHTML += `<tr><td>${r[0]}</td><td>${r[1]}</td></tr>`;
+  ordenado.forEach((r, i)=>{
+    rankingMensalTabela.innerHTML += `
+      <tr>
+        <td>${i+1}º</td>
+        <td>${r[0]}</td>
+        <td>${r[1]}</td>
+      </tr>
+    `;
   });
 }
 
-// 🔄 NAVEGAÇÃO
+/* NAVEGAÇÃO */
 function mostrarRelatorio() {
   relatorio.style.display = "block";
   ranking.style.display = "none";
@@ -257,6 +331,7 @@ function mostrarRankingMensal() {
   rankingMensal.style.display = "block";
 }
 
+/* INICIAR */
 gerarRanking();
 </script>
 
