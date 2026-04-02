@@ -2,7 +2,7 @@
 <html lang="pt-br">
 <head>
 <meta charset="UTF-8">
-<title>COE Sistema</title>
+<title>Sistema COE</title>
 
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 
@@ -51,14 +51,28 @@ body {
   margin-bottom: 20px;
 }
 
+/* GRID */
 .grid {
   display: flex;
   flex-wrap: wrap;
   gap: 10px;
 }
 
-.grid input, select {
+.grid div {
   flex: 1 1 180px;
+}
+
+/* LABEL */
+label {
+  display: block;
+  margin-bottom: 5px;
+  font-size: 13px;
+  color: #94a3b8;
+}
+
+/* INPUT E SELECT */
+input, select {
+  width: 100%;
   padding: 10px;
   border-radius: 5px;
   border: none;
@@ -66,6 +80,7 @@ body {
   color: white;
 }
 
+/* BOTÃO */
 button {
   padding: 10px 15px;
   background: #22c55e;
@@ -79,11 +94,11 @@ button {
 .reset-btn { background: #ef4444; }
 .delete-btn { background: #ef4444; }
 
+/* TABELA */
 table {
   width: 100%;
   border-collapse: collapse;
   background: #020617;
-  border-radius: 10px;
 }
 
 th, td {
@@ -115,11 +130,29 @@ tr:hover { background: #0f172a; }
 
 <div class="card">
 <h3>Equipe</h3>
+
 <div class="grid">
-<select id="chefeSelect"></select>
-<select id="p1Select"></select>
-<select id="p3Select"></select>
-<select id="p4Select"></select>
+
+  <div>
+    <label>Chefe da Barca</label>
+    <select id="chefeSelect"></select>
+  </div>
+
+  <div>
+    <label>P1</label>
+    <select id="p1Select"></select>
+  </div>
+
+  <div>
+    <label>P3</label>
+    <select id="p3Select"></select>
+  </div>
+
+  <div>
+    <label>P4</label>
+    <select id="p4Select"></select>
+  </div>
+
 </div>
 </div>
 
@@ -222,10 +255,7 @@ function cadastrarPolicial() {
     return;
   }
 
-  policiais.push({
-    nome: nomePolicial.value,
-    rg: rgPolicial.value
-  });
+  policiais.push({ nome: nomePolicial.value, rg: rgPolicial.value });
 
   localStorage.setItem("policiais", JSON.stringify(policiais));
 
@@ -248,15 +278,13 @@ function excluirPolicial(rg) {
 /* LISTAR */
 function atualizarPoliciais() {
   listaPoliciais.innerHTML="";
-
   policiais.forEach(p=>{
     listaPoliciais.innerHTML += `
       <tr>
         <td>${p.nome}</td>
         <td>${p.rg}</td>
         <td><button class="delete-btn" onclick="excluirPolicial('${p.rg}')">Excluir</button></td>
-      </tr>
-    `;
+      </tr>`;
   });
 }
 
@@ -355,7 +383,7 @@ function gerarGrafico(lista) {
 
   if (grafico) grafico.destroy();
 
-  grafico = new Chart(grafico=document.getElementById("grafico"),{
+  grafico = new Chart(document.getElementById("grafico"), {
     type:"bar",
     data:{labels:nomes,datasets:[{data:pontos}]},
     options:{plugins:{legend:{display:false}}}
