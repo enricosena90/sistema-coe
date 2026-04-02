@@ -4,6 +4,8 @@
 <meta charset="UTF-8">
 <title>COE Sistema</title>
 
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
 <style>
 body {
   margin: 0;
@@ -96,7 +98,6 @@ th, td {
 }
 
 th {
-  background: #020617;
   color: #38bdf8;
 }
 
@@ -117,6 +118,7 @@ tr:hover {
 
 <div class="content">
 
+<!-- RELATORIO -->
 <div id="relatorio">
 
 <div class="card">
@@ -158,7 +160,9 @@ tr:hover {
 
 </div>
 
+<!-- RANKING -->
 <div id="ranking" style="display:none;">
+
 <div class="card">
 <h3>🏆 Ranking Geral</h3>
 <table>
@@ -172,8 +176,15 @@ tr:hover {
 <tbody id="rankingTabela"></tbody>
 </table>
 </div>
+
+<div class="card">
+<h3>📊 Desempenho</h3>
+<canvas id="grafico"></canvas>
 </div>
 
+</div>
+
+<!-- RANKING MENSAL -->
 <div id="rankingMensal" style="display:none;">
 <div class="card">
 <h3>📅 Ranking Mensal</h3>
@@ -195,7 +206,9 @@ tr:hover {
 
 <script>
 let dados = JSON.parse(localStorage.getItem("dados")) || [];
+let grafico;
 
+/* PONTOS */
 function calcularPontos(d) {
   return (
     (d.veiculos * 25) +
@@ -204,11 +217,12 @@ function calcularPontos(d) {
     (d.pistola * 10) +
     (d.smg * 15) +
     (d.explosivos * 15) +
-    (d.dinheiro * 0,30) +
+    (d.dinheiro * 10) +
     (d.municoes * 5)
   );
 }
 
+/* SALVAR */
 function salvar() {
   if (!chefe.value) {
     alert("Preencha o Chefe");
@@ -237,7 +251,6 @@ function salvar() {
   registro.pontos = calcularPontos(registro);
 
   dados.push(registro);
-
   localStorage.setItem("dados", JSON.stringify(dados));
 
   limparCampos();
@@ -247,20 +260,29 @@ function salvar() {
   alert("Relatório salvo 🚔");
 }
 
+/* LIMPAR */
 function limparCampos() {
   document.querySelectorAll("input").forEach(i => i.value = "");
 }
 
+/* RESET COM SENHA */
 function resetarDados() {
-  if (confirm("Tem certeza que deseja apagar TODOS os dados?")) {
-    localStorage.removeItem("dados");
-    dados = [];
-    gerarRanking();
-    gerarRankingMensal();
-    alert("Sistema resetado 🚨");
+  let senha = prompt("Digite a senha para resetar:");
+  
+  if (senha === "1234") {
+    if (confirm("Tem certeza que deseja apagar tudo?")) {
+      localStorage.removeItem("dados");
+      dados = [];
+      gerarRanking();
+      gerarRankingMensal();
+      alert("Sistema resetado 🚨");
+    }
+  } else {
+    alert("Senha incorreta ❌");
   }
 }
 
+/* RANKING */
 function gerarRanking() {
   let ranking = {};
 
@@ -274,16 +296,45 @@ function gerarRanking() {
   rankingTabela.innerHTML = "";
 
   ordenado.forEach((r, i)=>{
+    let medalha = "";
+    if (i===0) medalha="🥇";
+    else if (i===1) medalha="🥈";
+    else if (i===2) medalha="🥉";
+
     rankingTabela.innerHTML += `
       <tr>
-        <td>${i+1}º</td>
+        <td>${medalha} ${i+1}º</td>
         <td>${r[0]}</td>
         <td>${r[1]}</td>
       </tr>
     `;
   });
+
+  gerarGrafico(ordenado);
 }
 
+/* GRAFICO */
+function gerarGrafico(lista) {
+  let nomes = lista.map(d=>d[0]);
+  let pontos = lista.map(d=>d[1]);
+
+  if (grafico) grafico.destroy();
+
+  grafico = new Chart(document.getElementById("grafico"), {
+    type: "bar",
+    data: {
+      labels: nomes,
+      datasets: [{
+        data: pontos
+      }]
+    },
+    options: {
+      plugins: { legend: { display:false } }
+    }
+  });
+}
+
+/* RANKING MENSAL */
 function gerarRankingMensal() {
   let mes = mesFiltro.value;
   if (!mes) return;
@@ -312,24 +363,26 @@ function gerarRankingMensal() {
   });
 }
 
+/* NAVEGAÇÃO */
 function mostrarRelatorio() {
-  relatorio.style.display = "block";
-  ranking.style.display = "none";
-  rankingMensal.style.display = "none";
+  relatorio.style.display="block";
+  ranking.style.display="none";
+  rankingMensal.style.display="none";
 }
 
 function mostrarRanking() {
-  relatorio.style.display = "none";
-  ranking.style.display = "block";
-  rankingMensal.style.display = "none";
+  relatorio.style.display="none";
+  ranking.style.display="block";
+  rankingMensal.style.display="none";
 }
 
 function mostrarRankingMensal() {
-  relatorio.style.display = "none";
-  ranking.style.display = "none";
-  rankingMensal.style.display = "block";
+  relatorio.style.display="none";
+  ranking.style.display="none";
+  rankingMensal.style.display="block";
 }
 
+/* INICIO */
 gerarRanking();
 </script>
 
