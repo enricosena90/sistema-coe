@@ -2,7 +2,7 @@
 <html lang="pt-br">
 <head>
 <meta charset="UTF-8">
-<title>Sistema COE</title>
+<title>COE Sistema</title>
 
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 
@@ -51,7 +51,6 @@ body {
   margin-bottom: 20px;
 }
 
-/* GRID */
 .grid {
   display: flex;
   flex-wrap: wrap;
@@ -62,7 +61,6 @@ body {
   flex: 1 1 180px;
 }
 
-/* LABEL */
 label {
   display: block;
   margin-bottom: 5px;
@@ -70,7 +68,6 @@ label {
   color: #94a3b8;
 }
 
-/* INPUT E SELECT */
 input, select {
   width: 100%;
   padding: 10px;
@@ -80,7 +77,6 @@ input, select {
   color: white;
 }
 
-/* BOTÃO */
 button {
   padding: 10px 15px;
   background: #22c55e;
@@ -94,7 +90,6 @@ button {
 .reset-btn { background: #ef4444; }
 .delete-btn { background: #ef4444; }
 
-/* TABELA */
 table {
   width: 100%;
   border-collapse: collapse;
@@ -120,6 +115,7 @@ tr:hover { background: #0f172a; }
   <div class="menu-item" onclick="mostrarRelatorio()">Relatório</div>
   <div class="menu-item" onclick="mostrarRanking()">Ranking</div>
   <div class="menu-item" onclick="mostrarRankingMensal()">Ranking Mensal</div>
+  <div class="menu-item" onclick="mostrarRankingIndividual()">Ranking Individual</div>
   <div class="menu-item" onclick="mostrarCadastro()">Cadastro</div>
 </div>
 
@@ -130,28 +126,27 @@ tr:hover { background: #0f172a; }
 
 <div class="card">
 <h3>Equipe</h3>
-
 <div class="grid">
 
-  <div>
-    <label>Chefe da Barca</label>
-    <select id="chefeSelect"></select>
-  </div>
+<div>
+<label>Chefe da Barca</label>
+<select id="chefeSelect"></select>
+</div>
 
-  <div>
-    <label>P1</label>
-    <select id="p1Select"></select>
-  </div>
+<div>
+<label>P1</label>
+<select id="p1Select"></select>
+</div>
 
-  <div>
-    <label>P3</label>
-    <select id="p3Select"></select>
-  </div>
+<div>
+<label>P3</label>
+<select id="p3Select"></select>
+</div>
 
-  <div>
-    <label>P4</label>
-    <select id="p4Select"></select>
-  </div>
+<div>
+<label>P4</label>
+<select id="p4Select"></select>
+</div>
 
 </div>
 </div>
@@ -187,6 +182,7 @@ tr:hover { background: #0f172a; }
 
 <!-- RANKING -->
 <div id="ranking" style="display:none;">
+
 <div class="card">
 <h3>🏆 Ranking</h3>
 <table>
@@ -198,9 +194,15 @@ tr:hover { background: #0f172a; }
 </div>
 
 <div class="card">
-<h3>📊 Gráfico</h3>
+<h3>📊 Pontuação</h3>
 <canvas id="grafico"></canvas>
 </div>
+
+<div class="card">
+<h3>📊 Produtividade por Tipo</h3>
+<canvas id="graficoTipos"></canvas>
+</div>
+
 </div>
 
 <!-- RANKING MENSAL -->
@@ -213,6 +215,19 @@ tr:hover { background: #0f172a; }
 <tr><th>Posição</th><th>Chefe</th><th>Pontos</th></tr>
 </thead>
 <tbody id="rankingMensalTabela"></tbody>
+</table>
+</div>
+</div>
+
+<!-- RANKING INDIVIDUAL -->
+<div id="rankingIndividual" style="display:none;">
+<div class="card">
+<h3>👮 Ranking Individual</h3>
+<table>
+<thead>
+<tr><th>Posição</th><th>Policial</th><th>Pontos</th></tr>
+</thead>
+<tbody id="rankingIndividualTabela"></tbody>
 </table>
 </div>
 </div>
@@ -244,7 +259,7 @@ tr:hover { background: #0f172a; }
 <script>
 let dados = JSON.parse(localStorage.getItem("dados")) || [];
 let policiais = JSON.parse(localStorage.getItem("policiais")) || [];
-let grafico;
+let grafico, graficoTipos;
 
 /* CADASTRO */
 function cadastrarPolicial() {
@@ -256,7 +271,6 @@ function cadastrarPolicial() {
   }
 
   policiais.push({ nome: nomePolicial.value, rg: rgPolicial.value });
-
   localStorage.setItem("policiais", JSON.stringify(policiais));
 
   atualizarPoliciais();
@@ -266,61 +280,52 @@ function cadastrarPolicial() {
   rgPolicial.value="";
 }
 
-/* EXCLUIR */
 function excluirPolicial(rg) {
   policiais = policiais.filter(p => p.rg !== rg);
   localStorage.setItem("policiais", JSON.stringify(policiais));
-
   atualizarPoliciais();
   atualizarSelects();
 }
 
-/* LISTAR */
 function atualizarPoliciais() {
   listaPoliciais.innerHTML="";
   policiais.forEach(p=>{
     listaPoliciais.innerHTML += `
-      <tr>
-        <td>${p.nome}</td>
-        <td>${p.rg}</td>
-        <td><button class="delete-btn" onclick="excluirPolicial('${p.rg}')">Excluir</button></td>
-      </tr>`;
+    <tr>
+      <td>${p.nome}</td>
+      <td>${p.rg}</td>
+      <td><button class="delete-btn" onclick="excluirPolicial('${p.rg}')">Excluir</button></td>
+    </tr>`;
   });
 }
 
-/* SELECT */
 function atualizarSelects() {
-  let selects = [chefeSelect, p1Select, p3Select, p4Select];
+  let selects=[chefeSelect,p1Select,p3Select,p4Select];
 
-  selects.forEach(s => {
-    s.innerHTML = "<option value=''>Selecionar</option>";
-    policiais.forEach(p => {
-      s.innerHTML += `<option value="${p.nome}">${p.nome} (${p.rg})</option>`;
+  selects.forEach(s=>{
+    s.innerHTML="<option value=''>Selecionar</option>";
+    policiais.forEach(p=>{
+      s.innerHTML+=`<option value="${p.nome}">${p.nome} (${p.rg})</option>`;
     });
   });
 }
 
 /* PONTOS */
 function calcularPontos(d) {
-  return (
-    d.veiculos*25 +
-    d.drogas*15 +
-    d.fuzil*40 +
-    d.pistola*10 +
-    d.smg*15 +
-    d.explosivos*15 +
-    d.dinheiro*0.2 +
-    d.municoes*5
-  );
+  return d.veiculos*25 + d.drogas*15 + d.fuzil*40 + d.pistola*10 +
+         d.smg*15 + d.explosivos*15 + d.dinheiro*0.2 + d.municoes*5;
 }
 
 /* SALVAR */
 function salvar() {
   if (!chefeSelect.value) return alert("Selecione o chefe");
 
-  let r = {
-    chefe: chefeSelect.value,
-    data: data.value,
+  let r={
+    chefe:chefeSelect.value,
+    p1:p1Select.value,
+    p3:p3Select.value,
+    p4:p4Select.value,
+    data:data.value,
     veiculos:+veiculos.value||0,
     drogas:+drogas.value||0,
     fuzil:+fuzil.value||0,
@@ -331,7 +336,7 @@ function salvar() {
     municoes:+municoes.value||0
   };
 
-  r.pontos = calcularPontos(r);
+  r.pontos=calcularPontos(r);
 
   dados.push(r);
   localStorage.setItem("dados", JSON.stringify(dados));
@@ -342,63 +347,91 @@ function salvar() {
 
 /* RESET */
 function resetarDados() {
-  let senha = prompt("Senha:");
-  if (senha === "1234") {
+  let senha=prompt("Senha:");
+  if(senha==="1234"){
     localStorage.clear();
-    dados=[];
-    policiais=[];
+    dados=[]; policiais=[];
     atualizarPoliciais();
     atualizarSelects();
     gerarRanking();
-    alert("Resetado");
-  } else {
-    alert("Senha incorreta");
-  }
+  } else alert("Senha incorreta");
 }
 
 /* RANKING */
 function gerarRanking() {
-  let r = {};
+  let r={};
   dados.forEach(d=>{
     if(!r[d.chefe]) r[d.chefe]=0;
     r[d.chefe]+=d.pontos;
   });
 
-  let ord = Object.entries(r).sort((a,b)=>b[1]-a[1]);
+  let ord=Object.entries(r).sort((a,b)=>b[1]-a[1]);
 
   rankingTabela.innerHTML="";
-
   ord.forEach((e,i)=>{
-    let m = i==0?"🥇":i==1?"🥈":i==2?"🥉":"";
-    rankingTabela.innerHTML += `<tr><td>${m} ${i+1}</td><td>${e[0]}</td><td>${e[1]}</td></tr>`;
+    let m=i==0?"🥇":i==1?"🥈":i==2?"🥉":"";
+    rankingTabela.innerHTML+=`<tr><td>${m} ${i+1}</td><td>${e[0]}</td><td>${e[1]}</td></tr>`;
   });
 
   gerarGrafico(ord);
+  gerarGraficoTipos();
 }
 
-/* GRAFICO */
-function gerarGrafico(lista) {
-  let nomes = lista.map(x=>x[0]);
-  let pontos = lista.map(x=>x[1]);
-
-  if (grafico) grafico.destroy();
-
-  grafico = new Chart(document.getElementById("grafico"), {
+/* GRAFICOS */
+function gerarGrafico(lista){
+  if(grafico)grafico.destroy();
+  grafico=new Chart(grafico=document.getElementById("grafico"),{
     type:"bar",
-    data:{labels:nomes,datasets:[{data:pontos}]},
+    data:{labels:lista.map(x=>x[0]),datasets:[{data:lista.map(x=>x[1])}]},
     options:{plugins:{legend:{display:false}}}
   });
 }
 
+function gerarGraficoTipos(){
+  let t={veiculos:0,drogas:0,fuzil:0,pistola:0,smg:0,explosivos:0,dinheiro:0,municoes:0};
+
+  dados.forEach(d=>{
+    Object.keys(t).forEach(k=>t[k]+=d[k]||0);
+  });
+
+  if(graficoTipos)graficoTipos.destroy();
+
+  graficoTipos=new Chart(document.getElementById("graficoTipos"),{
+    type:"pie",
+    data:{labels:Object.keys(t),datasets:[{data:Object.values(t)}]}
+  });
+}
+
+/* INDIVIDUAL */
+function gerarRankingIndividual(){
+  let r={};
+
+  dados.forEach(d=>{
+    [d.chefe,d.p1,d.p3,d.p4].forEach(p=>{
+      if(!p)return;
+      if(!r[p])r[p]=0;
+      r[p]+=d.pontos/4;
+    });
+  });
+
+  let ord=Object.entries(r).sort((a,b)=>b[1]-a[1]);
+
+  rankingIndividualTabela.innerHTML="";
+  ord.forEach((e,i)=>{
+    let m=i==0?"🥇":i==1?"🥈":i==2?"🥉":"";
+    rankingIndividualTabela.innerHTML+=`<tr><td>${m} ${i+1}</td><td>${e[0]}</td><td>${e[1].toFixed(1)}</td></tr>`;
+  });
+}
+
 /* MENSAL */
-function gerarRankingMensal() {
-  let mes = mesFiltro.value;
-  if(!mes) return;
+function gerarRankingMensal(){
+  let mes=mesFiltro.value;
+  if(!mes)return;
 
   let r={};
   dados.forEach(d=>{
     if(d.data && d.data.startsWith(mes)){
-      if(!r[d.chefe]) r[d.chefe]=0;
+      if(!r[d.chefe])r[d.chefe]=0;
       r[d.chefe]+=d.pontos;
     }
   });
@@ -407,35 +440,16 @@ function gerarRankingMensal() {
 
   rankingMensalTabela.innerHTML="";
   ord.forEach((e,i)=>{
-    rankingMensalTabela.innerHTML += `<tr><td>${i+1}</td><td>${e[0]}</td><td>${e[1]}</td></tr>`;
+    rankingMensalTabela.innerHTML+=`<tr><td>${i+1}</td><td>${e[0]}</td><td>${e[1]}</td></tr>`;
   });
 }
 
 /* NAV */
-function mostrarRelatorio(){
-  relatorio.style.display="block";
-  ranking.style.display="none";
-  rankingMensal.style.display="none";
-  cadastro.style.display="none";
-}
-function mostrarRanking(){
-  relatorio.style.display="none";
-  ranking.style.display="block";
-  rankingMensal.style.display="none";
-  cadastro.style.display="none";
-}
-function mostrarRankingMensal(){
-  relatorio.style.display="none";
-  ranking.style.display="none";
-  rankingMensal.style.display="block";
-  cadastro.style.display="none";
-}
-function mostrarCadastro(){
-  relatorio.style.display="none";
-  ranking.style.display="none";
-  rankingMensal.style.display="none";
-  cadastro.style.display="block";
-}
+function mostrarRelatorio(){relatorio.style.display="block";ranking.style.display="none";rankingMensal.style.display="none";cadastro.style.display="none";rankingIndividual.style.display="none";}
+function mostrarRanking(){relatorio.style.display="none";ranking.style.display="block";rankingMensal.style.display="none";cadastro.style.display="none";rankingIndividual.style.display="none";}
+function mostrarRankingMensal(){relatorio.style.display="none";ranking.style.display="none";rankingMensal.style.display="block";cadastro.style.display="none";rankingIndividual.style.display="none";}
+function mostrarCadastro(){relatorio.style.display="none";ranking.style.display="none";rankingMensal.style.display="none";cadastro.style.display="block";rankingIndividual.style.display="none";}
+function mostrarRankingIndividual(){relatorio.style.display="none";ranking.style.display="none";rankingMensal.style.display="none";cadastro.style.display="none";rankingIndividual.style.display="block";gerarRankingIndividual();}
 
 /* INIT */
 atualizarPoliciais();
