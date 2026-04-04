@@ -251,12 +251,19 @@ th {
 <!-- CADASTRO -->
 <div id="cadastro" style="display:none;">
   <input id="nome" placeholder="Nome">
-  <input id="rg" placeholder="RG">
   <input id="patente" placeholder="Patente">
+  <input id="cargo" placeholder="Cargo">
+  <input id="rg" placeholder="RG">
   <button onclick="cadastrar()">Cadastrar</button>
   <table>
     <thead>
-      <tr><th>Nome</th><th>Excluir</th></tr>
+      <tr>
+        <th>Nome</th>
+        <th>Patente</th>
+        <th>Cargo</th>
+        <th>RG</th>
+        <th>Excluir</th>
+      </tr>
     </thead>
     <tbody id="lista"></tbody>
   </table>
@@ -296,16 +303,25 @@ function configPermissao(){
 }
 
 /* CADASTRO */
-window.cadastrar=async()=>{await addDoc(collection(db,"policiais"),{nome:nome.value,rg:rg.value,patente:patente.value});};
+window.cadastrar=async()=>{
+  await addDoc(collection(db,"policiais"),{
+    nome:nome.value,
+    patente:patente.value,
+    cargo:cargo.value,
+    rg:rg.value
+  });
+};
 
 /* EXCLUIR */
-window.excluir=id=>{if(confirm("Excluir policial?"))deleteDoc(doc(db,"policiais",id));};
+window.excluir=id=>{
+  if(confirm("Excluir policial?")) deleteDoc(doc(db,"policiais",id));
+};
 
 /* RESET */
 window.resetarSistema=async()=>{
-  if(prompt("Senha")!=="1510")return;
-  let p=await getDocs(collection(db,"policiais"));p.forEach(d=>deleteDoc(doc(db,"policiais",d.id)));
-  let r=await getDocs(collection(db,"relatorios"));r.forEach(d=>deleteDoc(doc(db,"relatorios",d.id)));
+  if(prompt("Senha")!=="1510") return;
+  let p=await getDocs(collection(db,"policiais")); p.forEach(d=>deleteDoc(doc(db,"policiais",d.id)));
+  let r=await getDocs(collection(db,"relatorios")); r.forEach(d=>deleteDoc(doc(db,"relatorios",d.id)));
 };
 
 /* TEMPO REAL */
@@ -315,13 +331,18 @@ window.onload=()=>{
     chefe.innerHTML=p1.innerHTML=p3.innerHTML=p4.innerHTML="<option></option>";
     snap.forEach(d=>{
       let p=d.data();
-      lista.innerHTML+=`<tr><td>${p.nome}</td><td><button onclick="excluir('${d.id}')">🗑️</button></td></tr>`;
+      lista.innerHTML+=`<tr>
+        <td>${p.nome}</td>
+        <td>${p.patente}</td>
+        <td>${p.cargo || "-"}</td>
+        <td>${p.rg}</td>
+        <td><button onclick="excluir('${d.id}')">🗑️</button></td>
+      </tr>`;
       [chefe,p1,p3,p4].forEach(s=>s.innerHTML+=`<option>${p.nome}</option>`);
     });
   });
   onSnapshot(collection(db,"relatorios"),snap=>{
-    dados=[];
-    snap.forEach(d=>dados.push(d.data()));
+    dados=[]; snap.forEach(d=>dados.push(d.data()));
     ranking();
     rankingMensal();
     rankingIndividual();
@@ -336,21 +357,18 @@ window.salvar=async()=>{
     explosivos:+explosivos.value||0,dinheiro:+dinheiro.value||0,municoes:+municoes.value||0
   };
 
-  // Pontos básicos
   let pontosBase = d.veiculos*25+d.drogas*15+d.fuzil*40+d.pistola*10+d.smg*15+d.explosivos*15+d.dinheiro*0.2+d.municoes*5;
 
-  // Pontos por patrulha 2 pontos/min
   let pontosTempo = 0;
   if(d.inicio && d.fim){
     let [h1,m1]=d.inicio.split(":").map(Number);
     let [h2,m2]=d.fim.split(":").map(Number);
     let minutos=(h2*60+m2)-(h1*60+m1);
-    if(minutos<0)minutos=0;
+    if(minutos<0) minutos=0;
     pontosTempo=minutos*2;
   }
 
-  d.pontos = pontosBase+pontosTempo;
-
+  d.pontos = pontosBase + pontosTempo;
   await addDoc(collection(db,"relatorios"),d);
 };
 
