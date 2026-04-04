@@ -2,7 +2,7 @@
 <html lang="pt-br">
 <head>
 <meta charset="UTF-8">
-<title>COE Sistema Online</title>
+<title>Sistema COE</title>
 
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 
@@ -11,22 +11,21 @@ body {
   margin: 0;
   font-family: Arial;
   display: flex;
-  background: #020403;
-  color: #d1fae5;
+  background: #05080f;
+  color: #fff;
 }
 
 .sidebar {
   width: 240px;
-  background: #03110a;
+  background: #0a0f1a;
   height: 100vh;
   padding: 20px;
-  border-right: 2px solid #14532d;
 }
 
 .logo {
-  color: #22c55e;
-  font-weight: bold;
+  color: #facc15;
   margin-bottom: 20px;
+  font-weight: bold;
 }
 
 .menu-item {
@@ -36,8 +35,8 @@ body {
 }
 
 .menu-item:hover {
-  background: #22c55e;
-  color: black;
+  background: #facc15;
+  color: #000;
 }
 
 .content {
@@ -46,41 +45,66 @@ body {
 }
 
 .card {
-  background: #03110a;
+  background: #0f172a;
   padding: 20px;
   border-radius: 10px;
   margin-bottom: 20px;
-  border: 1px solid #14532d;
+}
+
+.grid {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+
+.grid div {
+  flex: 1 1 180px;
+}
+
+label {
+  display: block;
+  margin-bottom: 5px;
+  font-size: 13px;
+  color: #94a3b8;
 }
 
 input, select {
   width: 100%;
   padding: 10px;
-  margin: 5px 0;
-  background: #020403;
-  border: 1px solid #14532d;
+  border-radius: 5px;
+  border: none;
+  background: #020617;
   color: white;
 }
 
 button {
-  padding: 10px;
+  padding: 10px 15px;
   background: #22c55e;
   border: none;
   cursor: pointer;
+  border-radius: 5px;
+  font-weight: bold;
   margin-top: 10px;
 }
+
+.reset-btn { background: #ef4444; }
+.delete-btn { background: #ef4444; }
 
 table {
   width: 100%;
-  margin-top: 10px;
   border-collapse: collapse;
+  background: #020617;
 }
 
 th, td {
-  padding: 10px;
-  border-bottom: 1px solid #14532d;
+  padding: 12px;
   text-align: center;
+  border-bottom: 1px solid #1e293b;
 }
+
+th { color: #38bdf8; }
+
+tr:hover { background: #0f172a; }
 </style>
 </head>
 
@@ -88,45 +112,122 @@ th, td {
 
 <div class="sidebar">
   <div class="logo">🚔 COE</div>
-  <div class="menu-item" onclick="mostrar('relatorio')">Relatório</div>
-  <div class="menu-item" onclick="mostrar('ranking')">Ranking</div>
-  <div class="menu-item" onclick="mostrar('cadastro')">Cadastro</div>
+  <div class="menu-item" onclick="mostrarRelatorio()">Relatório</div>
+  <div class="menu-item" onclick="mostrarRanking()">Ranking</div>
+  <div class="menu-item" onclick="mostrarRankingMensal()">Ranking Mensal</div>
+  <div class="menu-item" onclick="mostrarRankingIndividual()">Ranking Individual</div>
+  <div class="menu-item" onclick="mostrarCadastro()">Cadastro</div>
 </div>
 
 <div class="content">
 
 <!-- RELATORIO -->
 <div id="relatorio">
+
 <div class="card">
 <h3>Equipe</h3>
+<div class="grid">
+
+<div>
+<label>Chefe da Barca</label>
 <select id="chefeSelect"></select>
+</div>
+
+<div>
+<label>P1</label>
 <select id="p1Select"></select>
+</div>
+
+<div>
+<label>P3</label>
 <select id="p3Select"></select>
+</div>
+
+<div>
+<label>P4</label>
 <select id="p4Select"></select>
 </div>
 
-<div class="card">
-<h3>Dados</h3>
-<input type="date" id="data">
-<input type="number" id="veiculos" placeholder="Veículos">
-<input type="number" id="drogas" placeholder="Drogas">
-<input type="number" id="fuzil" placeholder="Fuzil">
-<input type="number" id="pistola" placeholder="Pistola">
-<input type="number" id="smg" placeholder="SMG">
-<input type="number" id="explosivos" placeholder="Explosivos">
-<input type="number" id="dinheiro" placeholder="Dinheiro">
-<input type="number" id="municoes" placeholder="Munições">
-<button onclick="salvar()">Salvar</button>
 </div>
+</div>
+
+<div class="card">
+<h3>Ronda</h3>
+<div class="grid">
+<input id="vtr" placeholder="VTR">
+<input type="date" id="data">
+<input type="time" id="inicio">
+<input type="time" id="fim">
+</div>
+</div>
+
+<div class="card">
+<h3>Produtividade</h3>
+<div class="grid">
+<input id="veiculos" type="number" placeholder="Veículos">
+<input id="drogas" type="number" placeholder="Drogas">
+<input id="fuzil" type="number" placeholder="Fuzil">
+<input id="pistola" type="number" placeholder="Pistola">
+<input id="smg" type="number" placeholder="SMG">
+<input id="explosivos" type="number" placeholder="Explosivos">
+<input id="dinheiro" type="number" placeholder="Dinheiro Sujo">
+<input id="municoes" type="number" placeholder="Munições">
+</div>
+</div>
+
+<button onclick="salvar()">Salvar Relatório</button>
+<button onclick="resetarDados()" class="reset-btn">🗑️ Resetar Sistema</button>
+
 </div>
 
 <!-- RANKING -->
 <div id="ranking" style="display:none;">
+
 <div class="card">
-<h3>Ranking</h3>
+<h3>🏆 Ranking</h3>
 <table>
-<thead><tr><th>#</th><th>Chefe</th><th>Pontos</th></tr></thead>
+<thead>
+<tr><th>Posição</th><th>Chefe</th><th>Pontos</th></tr>
+</thead>
 <tbody id="rankingTabela"></tbody>
+</table>
+</div>
+
+<div class="card">
+<h3>📊 Pontuação</h3>
+<canvas id="grafico"></canvas>
+</div>
+
+<div class="card">
+<h3>📊 Produtividade por Tipo</h3>
+<canvas id="graficoTipos"></canvas>
+</div>
+
+</div>
+
+<!-- RANKING MENSAL -->
+<div id="rankingMensal" style="display:none;">
+<div class="card">
+<h3>Ranking Mensal</h3>
+<input type="month" id="mesFiltro" onchange="gerarRankingMensal()">
+<table>
+<thead>
+<tr><th>Posição</th><th>Chefe</th><th>Pontos</th></tr>
+</thead>
+<tbody id="rankingMensalTabela"></tbody>
+</table>
+</div>
+</div>
+
+<!-- RANKING INDIVIDUAL -->
+<div id="rankingIndividual" style="display:none;">
+<div class="card">
+<h3>👮 Ranking Individual</h3>
+<table>
+<thead>
+<tr><th>Posição</th><th>Policial</th><th>Pontos</th></tr>
+</thead>
+<tbody id="rankingIndividualTabela"></tbody>
 </table>
 </div>
 </div>
@@ -134,48 +235,59 @@ th, td {
 <!-- CADASTRO -->
 <div id="cadastro" style="display:none;">
 <div class="card">
-<h3>Cadastro</h3>
+<h3>Cadastro de Policiais</h3>
+
+<div class="grid">
 <input id="nomePolicial" placeholder="Nome">
 <input id="rgPolicial" placeholder="RG">
-<input id="patentePolicial" placeholder="Patente">
+</div>
+
 <button onclick="cadastrarPolicial()">Cadastrar</button>
 
 <table>
-<thead><tr><th>Nome</th><th>RG</th><th>Patente</th><th>Ação</th></tr></thead>
+<thead>
+<tr><th>Nome</th><th>RG</th><th>Ação</th></tr>
+</thead>
 <tbody id="listaPoliciais"></tbody>
 </table>
+
 </div>
 </div>
 
 </div>
 
-<!-- FIREBASE -->
 <script type="module">
 import { initializeApp } from "https://www.gstatic.com/firebasejs/12.11.0/firebase-app.js";
 import { getFirestore, collection, addDoc, getDocs, deleteDoc, doc } from "https://www.gstatic.com/firebasejs/12.11.0/firebase-firestore.js";
 
+/* FIREBASE */
 const firebaseConfig = {
   apiKey: "AIzaSyBiv7jmqW6ELU6yxCSu7n18Qy_SHrbRmw4",
   authDomain: "sistema-coe-ff00a.firebaseapp.com",
   projectId: "sistema-coe-ff00a",
-  storageBucket: "sistema-coe-ff00a.firebasestorage.app",
-  messagingSenderId: "275693831669",
-  appId: "1:275693831669:web:9a6364da25414b3d28ccbc"
 };
 
 const app = initializeApp(firebaseConfig);
 const db = getFirestore(app);
 
-let policiais = [];
+/* VARIAVEIS */
 let dados = [];
+let policiais = [];
+let grafico, graficoTipos;
 
-/* CADASTRO */
+/* ================= CADASTRO ================= */
+
 window.cadastrarPolicial = async function () {
+  if (!nomePolicial.value || !rgPolicial.value) return;
+
   await addDoc(collection(db, "policiais"), {
     nome: nomePolicial.value,
-    rg: rgPolicial.value,
-    patente: patentePolicial.value
+    rg: rgPolicial.value
   });
+
+  nomePolicial.value="";
+  rgPolicial.value="";
+
   carregarPoliciais();
 };
 
@@ -185,41 +297,56 @@ window.excluirPolicial = async function (id) {
 };
 
 async function carregarPoliciais() {
-  const q = await getDocs(collection(db, "policiais"));
-  policiais = [];
-  listaPoliciais.innerHTML = "";
+  const query = await getDocs(collection(db, "policiais"));
 
-  q.forEach(d => {
-    let p = d.data();
-    p.id = d.id;
+  policiais = [];
+  listaPoliciais.innerHTML="";
+
+  query.forEach(d=>{
+    let p=d.data();
+    p.id=d.id;
     policiais.push(p);
 
     listaPoliciais.innerHTML += `
-      <tr>
-        <td>${p.nome}</td>
-        <td>${p.rg}</td>
-        <td>${p.patente}</td>
-        <td><button onclick="excluirPolicial('${p.id}')">Excluir</button></td>
-      </tr>`;
+    <tr>
+      <td>${p.nome}</td>
+      <td>${p.rg}</td>
+      <td><button class="delete-btn" onclick="excluirPolicial('${p.id}')">Excluir</button></td>
+    </tr>`;
   });
 
   atualizarSelects();
 }
 
 function atualizarSelects() {
-  [chefeSelect,p1Select,p3Select,p4Select].forEach(s=>{
-    s.innerHTML="<option>Selecionar</option>";
+  let selects=[chefeSelect,p1Select,p3Select,p4Select];
+
+  selects.forEach(s=>{
+    s.innerHTML="<option value=''>Selecionar</option>";
     policiais.forEach(p=>{
-      s.innerHTML+=`<option value="${p.nome}">${p.patente} ${p.nome}</option>`;
+      s.innerHTML+=`<option value="${p.nome}">${p.nome} (${p.rg})</option>`;
     });
   });
 }
 
-/* RELATORIO */
+/* ================= PONTOS ================= */
+
+function calcularPontos(d) {
+  return d.veiculos*25 + d.drogas*15 + d.fuzil*40 + d.pistola*10 +
+         d.smg*15 + d.explosivos*15 + d.dinheiro*0.2 + d.municoes*5;
+}
+
+/* ================= RELATORIO ================= */
+
 window.salvar = async function () {
-  await addDoc(collection(db, "relatorios"), {
-    chefe: chefeSelect.value,
-    data: data.value,
+  if (!chefeSelect.value) return alert("Selecione o chefe");
+
+  let r={
+    chefe:chefeSelect.value,
+    p1:p1Select.value,
+    p3:p3Select.value,
+    p4:p4Select.value,
+    data:data.value,
     veiculos:+veiculos.value||0,
     drogas:+drogas.value||0,
     fuzil:+fuzil.value||0,
@@ -228,53 +355,133 @@ window.salvar = async function () {
     explosivos:+explosivos.value||0,
     dinheiro:+dinheiro.value||0,
     municoes:+municoes.value||0
-  });
+  };
+
+  r.pontos=calcularPontos(r);
+
+  await addDoc(collection(db, "relatorios"), r);
 
   carregarRelatorios();
 };
 
 async function carregarRelatorios() {
-  const q = await getDocs(collection(db, "relatorios"));
-  dados = [];
-  q.forEach(d => dados.push(d.data()));
+  const query = await getDocs(collection(db, "relatorios"));
+
+  dados=[];
+  query.forEach(d=>dados.push(d.data()));
+
   gerarRanking();
+  gerarRankingMensal();
 }
 
-function calcular(d){
-return d.veiculos*25+d.drogas*15+d.fuzil*40+d.pistola*10+d.smg*15+d.explosivos*15+d.dinheiro*0.2+d.municoes*5;
+/* ================= RESET ================= */
+
+window.resetarDados = async function () {
+  let senha=prompt("Senha:");
+  if(senha!=="1234") return alert("Senha incorreta");
+
+  alert("⚠️ Apague manualmente no Firebase (Firestore)");
+
+  // Segurança: reset total precisa apagar no painel Firebase
+};
+
+/* ================= RANKING ================= */
+
+function gerarRanking() {
+  let r={};
+
+  dados.forEach(d=>{
+    if(!r[d.chefe]) r[d.chefe]=0;
+    r[d.chefe]+=d.pontos;
+  });
+
+  let ord=Object.entries(r).sort((a,b)=>b[1]-a[1]);
+
+  rankingTabela.innerHTML="";
+  ord.forEach((e,i)=>{
+    let m=i==0?"🥇":i==1?"🥈":i==2?"🥉":"";
+    rankingTabela.innerHTML+=`<tr><td>${m} ${i+1}</td><td>${e[0]}</td><td>${e[1]}</td></tr>`;
+  });
+
+  gerarGrafico(ord);
+  gerarGraficoTipos();
 }
 
-function gerarRanking(){
-let r={};
-dados.forEach(d=>{
-let p=calcular(d);
-if(!r[d.chefe])r[d.chefe]=0;
-r[d.chefe]+=p;
-});
+/* ================= GRAFICOS ================= */
 
-let ord=Object.entries(r).sort((a,b)=>b[1]-a[1]);
+function gerarGrafico(lista){
+  if(grafico)grafico.destroy();
 
-rankingTabela.innerHTML="";
-ord.forEach((e,i)=>{
-let m=i==0?"🥇":i==1?"🥈":i==2?"🥉":"";
-rankingTabela.innerHTML+=`<tr><td>${m} ${i+1}</td><td>${e[0]}</td><td>${e[1]}</td></tr>`;
-});
+  grafico=new Chart(document.getElementById("grafico"),{
+    type:"bar",
+    data:{labels:lista.map(x=>x[0]),datasets:[{data:lista.map(x=>x[1])}]},
+    options:{plugins:{legend:{display:false}}}
+  });
 }
 
-/* NAV */
-window.mostrar = function(sec){
-document.getElementById("relatorio").style.display="none";
-document.getElementById("ranking").style.display="none";
-document.getElementById("cadastro").style.display="none";
-document.getElementById(sec).style.display="block";
+function gerarGraficoTipos(){
+  let t={veiculos:0,drogas:0,fuzil:0,pistola:0,smg:0,explosivos:0,dinheiro:0,municoes:0};
+
+  dados.forEach(d=>{
+    Object.keys(t).forEach(k=>t[k]+=d[k]||0);
+  });
+
+  if(graficoTipos)graficoTipos.destroy();
+
+  graficoTipos=new Chart(document.getElementById("graficoTipos"),{
+    type:"pie",
+    data:{labels:Object.keys(t),datasets:[{data:Object.values(t)}]}
+  });
+}
+
+/* ================= INDIVIDUAL ================= */
+
+window.gerarRankingIndividual=function(){
+  let r={};
+
+  dados.forEach(d=>{
+    [d.chefe,d.p1,d.p3,d.p4].forEach(p=>{
+      if(!p)return;
+      if(!r[p])r[p]=0;
+      r[p]+=d.pontos/4;
+    });
+  });
+
+  let ord=Object.entries(r).sort((a,b)=>b[1]-a[1]);
+
+  rankingIndividualTabela.innerHTML="";
+  ord.forEach((e,i)=>{
+    let m=i==0?"🥇":i==1?"🥈":i==2?"🥉":"";
+    rankingIndividualTabela.innerHTML+=`<tr><td>${m} ${i+1}</td><td>${e[0]}</td><td>${e[1].toFixed(1)}</td></tr>`;
+  });
+}
+
+/* ================= MENSAL ================= */
+
+window.gerarRankingMensal=function(){
+  let mes=mesFiltro.value;
+  if(!mes)return;
+
+  let r={};
+  dados.forEach(d=>{
+    if(d.data && d.data.startsWith(mes)){
+      if(!r[d.chefe])r[d.chefe]=0;
+      r[d.chefe]+=d.pontos;
+    }
+  });
+
+  let ord=Object.entries(r).sort((a,b)=>b[1]-a[1]);
+
+  rankingMensalTabela.innerHTML="";
+  ord.forEach((e,i)=>{
+    rankingMensalTabela.innerHTML+=`<tr><td>${i+1}</td><td>${e[0]}</td><td>${e[1]}</td></tr>`;
+  });
 }
 
 /* INIT */
 carregarPoliciais();
 carregarRelatorios();
-
 </script>
 
 </body>
-</html>
 </html>
