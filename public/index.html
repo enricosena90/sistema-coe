@@ -7,63 +7,192 @@
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 
 <style>
-body { margin:0; font-family:Arial; background:#020617; color:white; }
-.sidebar { width:230px; background:#020617; border-right:2px solid #22c55e; padding:20px; height:100vh; position:fixed; }
-.content { margin-left:250px; padding:20px; }
-.menu-item { padding:10px; cursor:pointer; }
-.card { border:1px solid #22c55e; padding:10px; margin-bottom:10px; }
-input,select { width:100%; padding:8px; margin:5px 0; background:black; color:white; border:1px solid #22c55e; }
-button { padding:8px; background:#22c55e; border:none; cursor:pointer; }
-table { width:100%; border-collapse:collapse; }
-td,th { border-bottom:1px solid #22c55e; padding:5px; text-align:center; font-size:12px; }
+/* =========================
+   COE PROFISSIONAL - ESTILO MILITAR
+========================= */
+body {
+  margin: 0;
+  font-family: 'Arial', sans-serif;
+  background: #010b05; /* preto profundo */
+  color: #fff;
+}
+
+/* Sidebar */
+.sidebar {
+  width: 230px;
+  background: #0b1e10; /* verde escuro */
+  border-right: 3px solid #22c55e;
+  height: 100vh;
+  position: fixed;
+  padding: 20px 10px;
+  box-sizing: border-box;
+}
+
+.sidebar .menu-item {
+  padding: 12px 10px;
+  margin: 8px 0;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: 0.2s;
+  font-weight: bold;
+  text-align: center;
+  border: 1px solid #22c55e;
+  background: #0b1e10;
+}
+
+.sidebar .menu-item:hover {
+  background: #22c55e;
+  color: #010b05;
+  transform: scale(1.02);
+  box-shadow: 0 0 10px #22c55e;
+}
+
+/* Content */
+.content {
+  margin-left: 240px;
+  padding: 20px;
+}
+
+/* Cards */
+.card {
+  background: #0b1e10;
+  border: 2px solid #22c55e;
+  padding: 20px;
+  border-radius: 12px;
+  margin-bottom: 20px;
+  box-shadow: 0 0 15px #22c55e inset, 0 0 15px #010b05;
+}
+
+/* Inputs e selects */
+input, select {
+  width: 100%;
+  padding: 10px;
+  margin: 6px 0;
+  background: #010b05;
+  color: #22c55e;
+  border: 2px solid #22c55e;
+  border-radius: 6px;
+  font-weight: bold;
+  box-sizing: border-box;
+}
+
+/* Buttons */
+button {
+  padding: 10px 20px;
+  background: #22c55e;
+  color: #010b05;
+  border: none;
+  cursor: pointer;
+  font-weight: bold;
+  margin-top: 10px;
+  border-radius: 6px;
+  transition: 0.2s;
+}
+
+button:hover {
+  background: #1c7b46;
+  transform: scale(1.05);
+}
+
+/* Tables */
+table {
+  width: 100%;
+  border-collapse: collapse;
+  margin-top: 10px;
+}
+
+th, td {
+  border-bottom: 1px solid #22c55e;
+  padding: 8px;
+  text-align: center;
+  font-size: 12px;
+  font-weight: bold;
+}
+
+th {
+  background: #0b1e10;
+}
+
+/* Login */
+.login {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 100vh;
+}
+
+.box {
+  background: #0b1e10;
+  border: 2px solid #22c55e;
+  padding: 40px;
+  border-radius: 14px;
+  box-shadow: 0 0 20px #22c55e;
+  text-align: center;
+}
+
+#grafico {
+  margin-top: 20px;
+}
 </style>
 </head>
-
 <body>
 
+<!-- LOGIN -->
+<div id="login" class="login">
+  <div class="box">
+    <h2>💀 COE Login</h2>
+    <input id="user" placeholder="Usuário">
+    <input id="pass" type="password" placeholder="Senha">
+    <button onclick="logar()">Entrar</button>
+  </div>
+</div>
+
+<!-- SISTEMA -->
+<div id="sistema" style="display:none;">
+
 <div class="sidebar">
-<div class="menu-item" onclick="mostrar('relatorio')">Relatório</div>
-<div class="menu-item" onclick="mostrar('ranking')">Ranking</div>
-<div class="menu-item" onclick="mostrar('mensal')">Ranking Mensal</div>
-<div class="menu-item" onclick="mostrar('individual')">Ranking Individual</div>
-<div class="menu-item" onclick="mostrar('cadastro')">Cadastro</div>
-<div class="menu-item" onclick="resetarSistema()" style="color:red;">Reset</div>
+  <div class="menu-item" onclick="mostrar('relatorio')">Relatório</div>
+  <div class="menu-item" onclick="mostrar('ranking')">Ranking</div>
+  <div class="menu-item" onclick="mostrar('mensal')">Ranking Mensal</div>
+  <div class="menu-item" onclick="mostrar('individual')">Ranking Individual</div>
+  <div class="menu-item" onclick="mostrar('cadastro')" id="menuCadastro">Cadastro</div>
+  <div class="menu-item" onclick="resetarSistema()" id="menuReset" style="color:red;">Reset</div>
 </div>
 
 <div class="content">
 
 <!-- RELATORIO -->
 <div id="relatorio">
-<div class="card">
-<h3>Equipe</h3>
-<label>Chefe da Barca</label><select id="chefe"></select>
-<label>P1</label><select id="p1"></select>
-<label>P3</label><select id="p3"></select>
-<label>P4</label><select id="p4"></select>
-</div>
+  <div class="card">
+    <h3>Equipe</h3>
+    <label>Chefe da Barca</label><select id="chefe"></select>
+    <label>P1</label><select id="p1"></select>
+    <label>P3</label><select id="p3"></select>
+    <label>P4</label><select id="p4"></select>
+  </div>
 
-<div class="card">
-<h3>Ronda</h3>
-<input id="vtr" placeholder="Viatura">
-<input type="date" id="data">
-<input type="time" id="inicio">
-<input type="time" id="fim">
-</div>
+  <div class="card">
+    <h3>Ronda</h3>
+    <input id="vtr" placeholder="Viatura">
+    <input type="date" id="data">
+    <input type="time" id="inicio">
+    <input type="time" id="fim">
+  </div>
 
-<div class="card">
-<h3>Produtividade</h3>
-<input id="veiculos" placeholder="Veículos">
-<input id="drogas" placeholder="Drogas">
-<input id="fuzil" placeholder="Fuzil">
-<input id="pistola" placeholder="Pistola">
-<input id="smg" placeholder="SMG">
-<input id="explosivos" placeholder="Explosivos">
-<input id="dinheiro" placeholder="Dinheiro">
-<input id="municoes" placeholder="Munições">
-</div>
+  <div class="card">
+    <h3>Produtividade</h3>
+    <input id="veiculos" placeholder="Veículos">
+    <input id="drogas" placeholder="Drogas">
+    <input id="fuzil" placeholder="Fuzil">
+    <input id="pistola" placeholder="Pistola">
+    <input id="smg" placeholder="SMG">
+    <input id="explosivos" placeholder="Explosivos">
+    <input id="dinheiro" placeholder="Dinheiro">
+    <input id="municoes" placeholder="Munições">
+  </div>
 
-<button onclick="salvar()">Salvar</button>
-<canvas id="grafico"></canvas>
+  <button onclick="salvar()">Salvar</button>
+  <canvas id="grafico"></canvas>
 </div>
 
 <!-- RANKING -->
@@ -100,6 +229,7 @@ td,th { border-bottom:1px solid #22c55e; padding:5px; text-align:center; font-si
 </div>
 
 </div>
+</div>
 
 <script type="module">
 import { initializeApp } from "https://www.gstatic.com/firebasejs/12.11.0/firebase-app.js";
@@ -110,24 +240,37 @@ apiKey:"AIzaSyBiv7jmqW6ELU6yxCSu7n18Qy_SHrbRmw4",
 authDomain:"sistema-coe-ff00a.firebaseapp.com",
 projectId:"sistema-coe-ff00a"
 });
-
 const db = getFirestore(app);
 
 let dados=[];
 let grafico;
 
+/* LOGIN */
+window.logar=()=>{
+let u=user.value;
+let s=pass.value;
+if(u==="admin" && s==="1510"){localStorage.setItem("nivel","admin");}
+else if(u==="user" && s==="1234"){localStorage.setItem("nivel","user");}
+else return alert("Erro de login");
+login.style.display="none";
+sistema.style.display="block";
+configPermissao();
+};
+function configPermissao(){
+let nivel=localStorage.getItem("nivel");
+if(nivel!=="admin"){
+menuCadastro.style.display="none";
+menuReset.style.display="none";
+}
+}
+
 /* CADASTRO */
 window.cadastrar=async()=>{
-await addDoc(collection(db,"policiais"),{
-nome:nome.value,rg:rg.value,patente:patente.value
-});
+await addDoc(collection(db,"policiais"),{nome:nome.value,rg:rg.value,patente:patente.value});
 };
 
 /* EXCLUIR */
-window.excluir=id=>{
-if(confirm("Excluir policial?"))
-deleteDoc(doc(db,"policiais",id));
-};
+window.excluir=id=>{if(confirm("Excluir policial?"))deleteDoc(doc(db,"policiais",id));};
 
 /* RESET */
 window.resetarSistema=async()=>{
@@ -149,7 +292,6 @@ lista.innerHTML+=`<tr><td>${p.nome}</td><td><button onclick="excluir('${d.id}')"
 [chefe,p1,p3,p4].forEach(s=>s.innerHTML+=`<option>${p.nome}</option>`);
 });
 });
-
 onSnapshot(collection(db,"relatorios"),snap=>{
 dados=[];
 snap.forEach(d=>dados.push(d.data()));
@@ -161,19 +303,13 @@ graf();
 };
 
 /* PONTOS */
-function pts(d){
-return d.veiculos*25+d.drogas*15+d.fuzil*40+d.pistola*10+d.smg*15+d.explosivos*15+d.dinheiro*0.2+d.municoes*5;
-}
+function pts(d){return d.veiculos*25+d.drogas*15+d.fuzil*40+d.pistola*10+d.smg*15+d.explosivos*15+d.dinheiro*0.2+d.municoes*5;}
 
 /* SALVAR */
 window.salvar=async()=>{
-let d={
-chefe:chefe.value,p1:p1.value,p3:p3.value,p4:p4.value,
-vtr:vtr.value,data:data.value,inicio:inicio.value,fim:fim.value,
-veiculos:+veiculos.value||0,drogas:+drogas.value||0,fuzil:+fuzil.value||0,
-pistola:+pistola.value||0,smg:+smg.value||0,explosivos:+explosivos.value||0,
-dinheiro:+dinheiro.value||0,municoes:+municoes.value||0
-};
+let d={chefe:chefe.value,p1:p1.value,p3:p3.value,p4:p4.value,vtr:vtr.value,data:data.value,inicio:inicio.value,fim:fim.value,
+veiculos:+veiculos.value||0,drogas:+drogas.value||0,fuzil:+fuzil.value||0,pistola:+pistola.value||0,smg:+smg.value||0,
+explosivos:+explosivos.value||0,dinheiro:+dinheiro.value||0,municoes:+municoes.value||0};
 d.pontos=pts(d);
 await addDoc(collection(db,"relatorios"),d);
 };
@@ -181,16 +317,11 @@ await addDoc(collection(db,"relatorios"),d);
 /* RANKING */
 function ranking(){
 let r={};
-dados.forEach(d=>{
-[d.chefe,d.p1,d.p3,d.p4].forEach(p=>{
+dados.forEach(d=>{[d.chefe,d.p1,d.p3,d.p4].forEach(p=>{
 if(!p)return;
 if(!r[p])r[p]={veiculos:0,drogas:0,fuzil:0,pistola:0,smg:0,explosivos:0,dinheiro:0,municoes:0,pontos:0};
-Object.keys(r[p]).forEach(k=>{
-if(k!=="pontos")r[p][k]+=d[k]/4;
-});
-r[p].pontos+=d.pontos/4;
-});
-});
+Object.keys(r[p]).forEach(k=>{if(k!=="pontos")r[p][k]+=d[k]/4;});r[p].pontos+=d.pontos/4;
+});});
 let ord=Object.entries(r).sort((a,b)=>b[1].pontos-a[1].pontos);
 rankingTabela.innerHTML="";
 ord.forEach((e,i)=>{
@@ -207,30 +338,17 @@ rankingTabela.innerHTML+=`<tr><td>${i+1}</td><td>${e[0]}</td><td>${d.pontos.toFi
 window.rankingMensal=()=>{
 let m=mes.value;
 let r={};
-dados.forEach(d=>{
-if(d.data && d.data.startsWith(m)){
-r[d.chefe]=(r[d.chefe]||0)+d.pontos;
-}
-});
+dados.forEach(d=>{if(d.data && d.data.startsWith(m)){r[d.chefe]=(r[d.chefe]||0)+d.pontos;}});
 mensalTabela.innerHTML="";
-Object.entries(r).forEach((e,i)=>{
-mensalTabela.innerHTML+=`<tr><td>${i+1}</td><td>${e[0]}</td><td>${e[1]}</td></tr>`;
-});
+Object.entries(r).forEach((e,i)=>{mensalTabela.innerHTML+=`<tr><td>${i+1}</td><td>${e[0]}</td><td>${e[1]}</td></tr>`;});
 };
 
 /* INDIVIDUAL */
 function rankingIndividual(){
 let r={};
-dados.forEach(d=>{
-[d.chefe,d.p1,d.p3,d.p4].forEach(p=>{
-if(!p)return;
-r[p]=(r[p]||0)+d.pontos/4;
-});
-});
+dados.forEach(d=>{[d.chefe,d.p1,d.p3,d.p4].forEach(p=>{if(!p)return;r[p]=(r[p]||0)+d.pontos/4;});});
 individualTabela.innerHTML="";
-Object.entries(r).forEach((e,i)=>{
-individualTabela.innerHTML+=`<tr><td>${i+1}</td><td>${e[0]}</td><td>${e[1].toFixed(1)}</td></tr>`;
-});
+Object.entries(r).forEach((e,i)=>{individualTabela.innerHTML+=`<tr><td>${i+1}</td><td>${e[0]}</td><td>${e[1].toFixed(1)}</td></tr>`;});
 }
 
 /* GRAFICO */
@@ -240,16 +358,14 @@ dados.forEach(d=>Object.keys(t).forEach(k=>t[k]+=d[k]));
 if(grafico)grafico.destroy();
 grafico=new Chart(document.getElementById("grafico"),{
 type:"bar",
-data:{labels:Object.keys(t),datasets:[{data:Object.values(t)}]}
+data:{labels:Object.keys(t),datasets:[{data:Object.values(t),backgroundColor:['#22c55e','#1c7b46','#16a34a','#4ade80','#22c55e','#1c7b46','#16a34a','#4ade80']}]},
+options:{plugins:{legend:{display:false}}}
 });
 }
 
 /* NAV */
-window.mostrar=id=>{
-["relatorio","ranking","mensal","individual","cadastro"].forEach(p=>document.getElementById(p).style.display="none");
-document.getElementById(id).style.display="block";
-};
+window.mostrar=id=>{["relatorio","ranking","mensal","individual","cadastro"].forEach(p=>document.getElementById(p).style.display="none");
+document.getElementById(id).style.display="block";};
 </script>
-
 </body>
 </html>
