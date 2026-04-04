@@ -19,7 +19,7 @@ body { margin:0; font-family:Arial; display:flex; background:#020617; color:whit
 input,select { width:100%; padding:10px; background:black; color:white; border:1px solid #22c55e; }
 button { padding:10px; background:#22c55e; border:none; cursor:pointer; margin-top:10px; }
 table { width:100%; border-collapse:collapse; }
-th,td { padding:10px; border-bottom:1px solid #22c55e; text-align:center; }
+th,td { padding:8px; border-bottom:1px solid #22c55e; text-align:center; font-size:12px; }
 </style>
 </head>
 
@@ -29,37 +29,32 @@ th,td { padding:10px; border-bottom:1px solid #22c55e; text-align:center; }
   <div class="logo">💀 COE</div>
   <div class="menu-item" onclick="mostrar('relatorio')">Relatório</div>
   <div class="menu-item" onclick="mostrar('ranking')">Ranking</div>
-  <div class="menu-item" onclick="mostrar('mensal')">Ranking Mensal</div>
-  <div class="menu-item" onclick="mostrar('individual')">Ranking Individual</div>
   <div class="menu-item" onclick="mostrar('cadastro')">Cadastro</div>
 
   <div class="menu-item" onclick="resetarSistema()" style="background:red;color:white;margin-top:20px;">
-    💀 Resetar Sistema
+    💀 Resetar
   </div>
 </div>
 
 <div class="content">
 
+<!-- RELATORIO -->
 <div id="relatorio">
 <div class="card">
 <h3>Equipe</h3>
 <div class="grid">
-<div><label>Chefe</label><select id="chefe"></select></div>
-<div><label>P1</label><select id="p1"></select></div>
-<div><label>P3</label><select id="p3"></select></div>
-<div><label>P4</label><select id="p4"></select></div>
+<select id="chefe"></select>
+<select id="p1"></select>
+<select id="p3"></select>
+<select id="p4"></select>
 </div>
 </div>
 
 <div class="card">
-<h3>Ronda</h3>
-<div class="grid">
 <input type="date" id="data">
 </div>
-</div>
 
 <div class="card">
-<h3>Produtividade</h3>
 <div class="grid">
 <input id="veiculos" type="number" placeholder="Veículos">
 <input id="drogas" type="number" placeholder="Drogas">
@@ -73,31 +68,26 @@ th,td { padding:10px; border-bottom:1px solid #22c55e; text-align:center; }
 </div>
 
 <button onclick="salvar()">Salvar</button>
+
+<canvas id="grafico"></canvas>
 </div>
 
+<!-- RANKING -->
 <div id="ranking" style="display:none;">
 <div class="card">
-<h3>🏆 Ranking</h3>
 <table>
-<thead><tr><th>#</th><th>Nome</th><th>Pontos</th></tr></thead>
+<thead>
+<tr>
+<th>#</th><th>Nome</th><th>Pts</th>
+<th>🚗</th><th>💊</th><th>FZ</th><th>PT</th><th>SMG</th><th>💣</th><th>💰</th><th>🔸</th>
+</tr>
+</thead>
 <tbody id="rankingTabela"></tbody>
 </table>
 </div>
 </div>
 
-<div id="mensal" style="display:none;">
-<div class="card">
-<input type="month" id="mes" onchange="rankingMensal()">
-<table><tbody id="mensalTabela"></tbody></table>
-</div>
-</div>
-
-<div id="individual" style="display:none;">
-<div class="card">
-<table><tbody id="individualTabela"></tbody></table>
-</div>
-</div>
-
+<!-- CADASTRO -->
 <div id="cadastro" style="display:none;">
 <div class="card">
 <input id="nome" placeholder="Nome">
@@ -112,191 +102,164 @@ th,td { padding:10px; border-bottom:1px solid #22c55e; text-align:center; }
 
 <script type="module">
 import { initializeApp } from "https://www.gstatic.com/firebasejs/12.11.0/firebase-app.js";
-import { 
-  getFirestore, 
-  collection, 
-  addDoc, 
-  onSnapshot,
-  getDocs,
-  deleteDoc,
-  doc
-} from "https://www.gstatic.com/firebasejs/12.11.0/firebase-firestore.js";
+import { getFirestore, collection, addDoc, onSnapshot, getDocs, deleteDoc, doc } 
+from "https://www.gstatic.com/firebasejs/12.11.0/firebase-firestore.js";
 
-const firebaseConfig = {
-  apiKey: "AIzaSyBiv7jmqW6ELU6yxCSu7n18Qy_SHrbRmw4",
-  authDomain: "sistema-coe-ff00a.firebaseapp.com",
-  projectId: "sistema-coe-ff00a"
-};
+const app = initializeApp({
+apiKey:"AIzaSyBiv7jmqW6ELU6yxCSu7n18Qy_SHrbRmw4",
+authDomain:"sistema-coe-ff00a.firebaseapp.com",
+projectId:"sistema-coe-ff00a"
+});
 
-const app = initializeApp(firebaseConfig);
 const db = getFirestore(app);
 
-/* ELEMENTOS */
-const nomeInput = document.getElementById("nome");
-const rgInput = document.getElementById("rg");
-const patenteInput = document.getElementById("patente");
-
-const lista = document.getElementById("lista");
-const chefe = document.getElementById("chefe");
-const p1 = document.getElementById("p1");
-const p3 = document.getElementById("p3");
-const p4 = document.getElementById("p4");
-
-const rankingTabela = document.getElementById("rankingTabela");
-const mensalTabela = document.getElementById("mensalTabela");
-const individualTabela = document.getElementById("individualTabela");
-const mesInput = document.getElementById("mes");
-
-let dados = [];
+let dados=[];
+let grafico;
 
 /* CADASTRO */
-window.cadastrar = async ()=>{
-  if(!nomeInput.value) return alert("Digite o nome");
+window.cadastrar=async()=>{
+await addDoc(collection(db,"policiais"),{
+nome:nome.value,rg:rg.value,patente:patente.value
+});
+};
 
-  await addDoc(collection(db,"policiais"),{
-    nome:nomeInput.value,
-    rg:rgInput.value,
-    patente:patenteInput.value
-  });
+/* EXCLUIR */
+window.excluirPolicial=async(id)=>{
+if(confirm("Excluir?"))
+await deleteDoc(doc(db,"policiais",id));
+};
 
-  nomeInput.value="";
-  rgInput.value="";
-  patenteInput.value="";
+/* RESET */
+window.resetarSistema=async()=>{
+let s=prompt("Senha:");
+if(s!=="1510") return alert("Errado");
+if(!confirm("Apagar tudo?")) return;
+
+let p=await getDocs(collection(db,"policiais"));
+p.forEach(d=>deleteDoc(doc(db,"policiais",d.id)));
+
+let r=await getDocs(collection(db,"relatorios"));
+r.forEach(d=>deleteDoc(doc(db,"relatorios",d.id)));
+
+alert("Resetado");
 };
 
 /* TEMPO REAL */
-window.addEventListener("load", ()=>{
+window.onload=()=>{
 
-  onSnapshot(collection(db,"policiais"), snap=>{
-    lista.innerHTML="";
-    chefe.innerHTML="<option></option>";
-    p1.innerHTML="<option></option>";
-    p3.innerHTML="<option></option>";
-    p4.innerHTML="<option></option>";
+onSnapshot(collection(db,"policiais"),snap=>{
+lista.innerHTML="";
+chefe.innerHTML=p1.innerHTML=p3.innerHTML=p4.innerHTML="<option></option>";
 
-    snap.forEach(doc=>{
-      let p = doc.data();
+snap.forEach(d=>{
+let p=d.data();
 
-      lista.innerHTML += `<tr><td>${p.nome} (${p.patente})</td></tr>`;
+lista.innerHTML+=`
+<tr>
+<td>${p.nome}</td>
+<td><button onclick="excluirPolicial('${d.id}')">🗑️</button></td>
+</tr>`;
 
-      [chefe,p1,p3,p4].forEach(s=>{
-        s.innerHTML += `<option value="${p.nome}">${p.nome}</option>`;
-      });
-    });
-  });
-
-  onSnapshot(collection(db,"relatorios"), snap=>{
-    dados = [];
-
-    snap.forEach(doc=>{
-      dados.push(doc.data());
-    });
-
-    gerarRanking();
-    rankingMensal();
-    rankingIndividual();
-  });
-
+[chefe,p1,p3,p4].forEach(s=>s.innerHTML+=`<option>${p.nome}</option>`);
+});
 });
 
+onSnapshot(collection(db,"relatorios"),snap=>{
+dados=[];
+snap.forEach(d=>dados.push(d.data()));
+ranking();
+graf();
+});
+
+};
+
 /* PONTOS */
-function pontos(d){
+function pts(d){
 return d.veiculos*25+d.drogas*15+d.fuzil*40+d.pistola*10+d.smg*15+d.explosivos*15+d.dinheiro*0.2+d.municoes*5;
 }
 
 /* SALVAR */
-window.salvar = async ()=>{
-  let d={
-    chefe:chefe.value,
-    p1:p1.value,
-    p3:p3.value,
-    p4:p4.value,
-    data:document.getElementById("data").value,
-    veiculos:+document.getElementById("veiculos").value||0,
-    drogas:+document.getElementById("drogas").value||0,
-    fuzil:+document.getElementById("fuzil").value||0,
-    pistola:+document.getElementById("pistola").value||0,
-    smg:+document.getElementById("smg").value||0,
-    explosivos:+document.getElementById("explosivos").value||0,
-    dinheiro:+document.getElementById("dinheiro").value||0,
-    municoes:+document.getElementById("municoes").value||0
-  };
-
-  d.pontos = pontos(d);
-
-  await addDoc(collection(db,"relatorios"), d);
-
-  alert("Salvo com sucesso 🚀");
+window.salvar=async()=>{
+let d={
+chefe:chefe.value,p1:p1.value,p3:p3.value,p4:p4.value,data:data.value,
+veiculos:+veiculos.value||0,drogas:+drogas.value||0,fuzil:+fuzil.value||0,
+pistola:+pistola.value||0,smg:+smg.value||0,explosivos:+explosivos.value||0,
+dinheiro:+dinheiro.value||0,municoes:+municoes.value||0
+};
+d.pontos=pts(d);
+await addDoc(collection(db,"relatorios"),d);
 };
 
-/* RESET COM SENHA */
-window.resetarSistema = async () => {
-
-  const senha = prompt("🔐 Digite a senha para resetar:");
-  if (senha !== "1510") return alert("❌ Senha incorreta");
-
-  if (!confirm("⚠️ Apagar TODOS os dados?")) return;
-
-  const policiaisSnap = await getDocs(collection(db,"policiais"));
-  for (const d of policiaisSnap.docs) {
-    await deleteDoc(doc(db,"policiais",d.id));
-  }
-
-  const relatoriosSnap = await getDocs(collection(db,"relatorios"));
-  for (const d of relatoriosSnap.docs) {
-    await deleteDoc(doc(db,"relatorios",d.id));
-  }
-
-  alert("🔥 Sistema resetado");
-};
-
-/* RANKINGS */
-function gerarRanking(){
+/* RANKING */
+function ranking(){
 let r={};
-dados.forEach(d=>{
-if(!d.chefe)return;
-r[d.chefe]=(r[d.chefe]||0)+d.pontos;
-});
-let ord=Object.entries(r).sort((a,b)=>b[1]-a[1]);
-rankingTabela.innerHTML="";
-ord.forEach((e,i)=>{
-rankingTabela.innerHTML+=`<tr><td>${i+1}</td><td>${e[0]}</td><td>${e[1].toFixed(1)}</td></tr>`;
-});
-}
 
-window.rankingMensal=()=>{
-let mes=mesInput.value;
-let r={};
-dados.forEach(d=>{
- if(d.data && mes && d.data.startsWith(mes)){
-  r[d.chefe]=(r[d.chefe]||0)+d.pontos;
- }
-});
-let ord=Object.entries(r).sort((a,b)=>b[1]-a[1]);
-mensalTabela.innerHTML="";
-ord.forEach((e,i)=>{
-mensalTabela.innerHTML+=`<tr><td>${i+1}</td><td>${e[0]}</td><td>${e[1].toFixed(1)}</td></tr>`;
-});
-};
-
-function rankingIndividual(){
-let r={};
 dados.forEach(d=>{
 [d.chefe,d.p1,d.p3,d.p4].forEach(p=>{
 if(!p)return;
-r[p]=(r[p]||0)+d.pontos/4;
+
+if(!r[p]) r[p]={veiculos:0,drogas:0,fuzil:0,pistola:0,smg:0,explosivos:0,dinheiro:0,municoes:0,pontos:0};
+
+r[p].veiculos+=d.veiculos/4;
+r[p].drogas+=d.drogas/4;
+r[p].fuzil+=d.fuzil/4;
+r[p].pistola+=d.pistola/4;
+r[p].smg+=d.smg/4;
+r[p].explosivos+=d.explosivos/4;
+r[p].dinheiro+=d.dinheiro/4;
+r[p].municoes+=d.municoes/4;
+r[p].pontos+=d.pontos/4;
 });
 });
-let ord=Object.entries(r).sort((a,b)=>b[1]-a[1]);
-individualTabela.innerHTML="";
+
+let ord=Object.entries(r).sort((a,b)=>b[1].pontos-a[1].pontos);
+
+rankingTabela.innerHTML="";
 ord.forEach((e,i)=>{
-individualTabela.innerHTML+=`<tr><td>${i+1}</td><td>${e[0]}</td><td>${e[1].toFixed(1)}</td></tr>`;
+let d=e[1];
+rankingTabela.innerHTML+=`
+<tr>
+<td>${i+1}</td>
+<td>${e[0]}</td>
+<td>${d.pontos.toFixed(1)}</td>
+<td>${d.veiculos.toFixed(0)}</td>
+<td>${d.drogas.toFixed(0)}</td>
+<td>${d.fuzil.toFixed(0)}</td>
+<td>${d.pistola.toFixed(0)}</td>
+<td>${d.smg.toFixed(0)}</td>
+<td>${d.explosivos.toFixed(0)}</td>
+<td>${d.dinheiro.toFixed(0)}</td>
+<td>${d.municoes.toFixed(0)}</td>
+</tr>`;
+});
+}
+
+/* GRAFICO */
+function graf(){
+let t={veiculos:0,drogas:0,fuzil:0,pistola:0,smg:0,explosivos:0,dinheiro:0,municoes:0};
+
+dados.forEach(d=>{
+t.veiculos+=d.veiculos;
+t.drogas+=d.drogas;
+t.fuzil+=d.fuzil;
+t.pistola+=d.pistola;
+t.smg+=d.smg;
+t.explosivos+=d.explosivos;
+t.dinheiro+=d.dinheiro;
+t.municoes+=d.municoes;
+});
+
+if(grafico) grafico.destroy();
+
+grafico=new Chart(document.getElementById("grafico"),{
+type:"bar",
+data:{labels:Object.keys(t),datasets:[{data:Object.values(t)}]}
 });
 }
 
 /* NAV */
 window.mostrar=(id)=>{
-["relatorio","ranking","mensal","individual","cadastro"].forEach(p=>{
+["relatorio","ranking","cadastro"].forEach(p=>{
 document.getElementById(p).style.display="none";
 });
 document.getElementById(id).style.display="block";
