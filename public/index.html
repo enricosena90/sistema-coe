@@ -311,56 +311,75 @@ const hierarquia = {
   "Soldado 2ª Classe": 13
 };
 
-/* POPULA SELECT DE PATENTES */
-function popularPatentes(){
-  patente.innerHTML = "";
-  Object.keys(hierarquia).forEach(p => {
-    patente.innerHTML += `<option value="${p}">${p}</option>`;
-  });
-}
-popularPatentes();
-
 /* FORMATA NUMEROS */
 function formatNum(n){return n.toLocaleString('pt-BR');}
 
 /* LOGIN */
-window.logar = ()=>{let u=user.value; let s=pass.value;
+window.logar = ()=>{
+  let u=user.value;
+  let s=pass.value;
   if(u==="oficial" && s==="1510"){localStorage.setItem("nivel","oficial");}
   else if(u==="praça" && s==="1234"){localStorage.setItem("nivel","praca");}
   else return alert("Erro de login");
-  login.style.display="none"; sistema.style.display="block"; configPermissao();
+  login.style.display="none";
+  sistema.style.display="block";
+  configPermissao();
 };
 function configPermissao(){
   let nivel=localStorage.getItem("nivel");
   if(nivel!=="oficial"){menuCadastro.style.display="none";menuReset.style.display="none";}
 }
 
-/* CADASTRO */
-window.cadastrar=async()=>{await addDoc(collection(db,"policiais"),{
-  nome:nome.value,
-  patente:patente.value,
-  cargo:cargo.value,
-  rg:rg.value
+/* POPULA SELECT DE PATENTES */
+Object.keys(hierarquia).forEach(p=>{
+  let o=document.createElement("option");
+  o.value=p;
+  o.innerText=p;
+  patente.appendChild(o);
 });
+
+/* CADASTRO */
+window.cadastrar=async()=>{
+  await addDoc(collection(db,"policiais"),{
+    nome:nome.value,
+    patente:patente.value,
+    cargo:cargo.value,
+    rg:rg.value
+  });
 };
 
 /* EXCLUIR */
-window.excluir=id=>{if(confirm("Excluir policial?")) deleteDoc(doc(db,"policiais",id));};
+window.excluir=id=>{
+  if(confirm("Excluir policial?")) deleteDoc(doc(db,"policiais",id));
+};
 
 /* RESET SISTEMA */
-window.resetarSistema=async()=>{if(prompt("Senha")!=="1510") return;
+window.resetarSistema=async()=>{
+  if(prompt("Senha")!=="1510") return;
   let p=await getDocs(collection(db,"policiais")); p.forEach(d=>deleteDoc(doc(db,"policiais",d.id)));
   let r=await getDocs(collection(db,"relatorios")); r.forEach(d=>deleteDoc(doc(db,"relatorios",d.id)));
 };
 
-/* RESET RANKING GERAL */
-window.resetRanking=()=>{
+/* RESET RANKING GERAL (sem apagar relatórios) */
+window.resetRanking = () => {
   if(!confirm("Confirma reset do Ranking Geral?")) return;
-  rankingTabela.innerHTML="";
-  let r={};
-  dados.forEach(d=>{[d.chefe,d.p1,d.p3,d.p4].forEach(p=>{if(!p) return; if(!r[p]) r[p]={veiculos:0,drogas:0,fuzil:0,pistola:0,smg:0,explosivos:0,dinheiro:0,municoes:0,pontos:0};});});
-  Object.keys(r).forEach((nome,i)=>{let d=r[nome];
-    rankingTabela.innerHTML+=`<tr>
+
+  // Limpa a tabela do ranking
+  rankingTabela.innerHTML = "";
+
+  // Cria um objeto temporário com todos os policiais zerados
+  let r = {};
+  dados.forEach(d => {
+    [d.chefe,d.p1,d.p3,d.p4].forEach(p => {
+      if(!p) return;
+      if(!r[p]) r[p] = {veiculos:0, drogas:0, fuzil:0, pistola:0, smg:0, explosivos:0, dinheiro:0, municoes:0, pontos:0};
+    });
+  });
+
+  // Preenche a tabela zerada do Ranking Geral
+  Object.keys(r).forEach((nome, i) => {
+    let d = r[nome];
+    rankingTabela.innerHTML += `<tr>
       <td>${i+1}</td>
       <td>${nome}</td>
       <td>${formatNum(d.pontos.toFixed(1))}</td>
@@ -374,6 +393,7 @@ window.resetRanking=()=>{
       <td>${formatNum(d.municoes)}</td>
     </tr>`;
   });
+
   alert("Ranking Geral resetado sem afetar Ranking Mensal ou Individual!");
 };
 
@@ -382,30 +402,33 @@ window.onload=()=>{
   onSnapshot(collection(db,"policiais"),snap=>{
     lista.innerHTML="";
     chefe.innerHTML=p1.innerHTML=p3.innerHTML=p4.innerHTML="<option></option>";
+    let policias=[];
     snap.forEach(d=>{
       let p=d.data();
+      policias.push({id:d.id,...p});
+    });
+
+    // Ordena pela hierarquia
+    policias.sort((a,b)=>hierarquia[a.patente]-hierarquia[b.patente]);
+
+    policias.forEach(p=>{
       lista.innerHTML+=`<tr>
         <td>${p.nome}</td>
         <td>${p.patente}</td>
         <td>${p.cargo||"-"}</td>
         <td>${p.rg}</td>
-        <td><button onclick="excluir('${d.id}')">🗑️</button></td>
+        <td><button onclick="excluir('${p.id}')">🗑️</button></td>
       </tr>`;
       [chefe,p1,p3,p4].forEach(s=>s.innerHTML+=`<option>${p.nome}</option>`);
     });
-
-    // Ordena pela hierarquia
-    let linhas = Array.from(lista.querySelectorAll("tr"));
-    linhas.sort((a,b)=>{
-      let p1 = a.children[1].innerText;
-      let p2 = b.children[1].innerText;
-      return (hierarquia[p1]||100) - (hierarquia[p2]||100);
-    });
-    lista.innerHTML = "";
-    linhas.forEach(l => lista.appendChild(l));
   });
-
-  onSnapshot(collection(db,"relatorios"),snap=>{dados=[]; snap.forEach(d=>dados.push(d.data())); ranking(); rankingMensal(); rankingIndividual(); graf();});
+  onSnapshot(collection(db,"relatorios"),snap=>{
+    dados=[]; snap.forEach(d=>dados.push(d.data()));
+    ranking();
+    rankingMensal();
+    rankingIndividual();
+    graf();
+  });
 };
 
 /* SALVAR */
@@ -415,20 +438,46 @@ window.salvar=async()=>{
     explosivos:+explosivos.value||0,dinheiro:+dinheiro.value||0,municoes:+municoes.value||0
   };
 
-  let pontosBase=d.veiculos*25+d.drogas*15+d.fuzil*40+d.pistola*10+d.smg*15+d.explosivos*15+Math.floor(d.dinheiro/50000)*50+d.municoes*5;
-  let pontosTempo=0;
-  if(d.inicio && d.fim){let [h1,m1]=d.inicio.split(":").map(Number); let [h2,m2]=d.fim.split(":").map(Number); let minutos=(h2*60+m2)-(h1*60+m1); if(minutos<0) minutos=0; pontosTempo=minutos*2;}
-  d.pontos=pontosBase+pontosTempo;
+  let pontosBase = d.veiculos*25 + d.drogas*15 + d.fuzil*40 + d.pistola*10 + d.smg*15 + d.explosivos*15
+                 + Math.floor(d.dinheiro / 50000) * 50
+                 + d.municoes*5;
+
+  let pontosTempo = 0;
+  if(d.inicio && d.fim){
+    let [h1,m1]=d.inicio.split(":").map(Number);
+    let [h2,m2]=d.fim.split(":").map(Number);
+    let minutos=(h2*60+m2)-(h1*60+m1);
+    if(minutos<0) minutos=0;
+    pontosTempo=minutos*2;
+  }
+
+  d.pontos = pontosBase + pontosTempo;
   await addDoc(collection(db,"relatorios"),d);
 };
 
 /* RANKING */
 function ranking(){
   let r={};
-  dados.forEach(d=>{[d.chefe,d.p1,d.p3,d.p4].forEach(p=>{if(!p)return; if(!r[p]) r[p]={veiculos:0,drogas:0,fuzil:0,pistola:0,smg:0,explosivos:0,dinheiro:0,municoes:0,pontos:0}; let dp=r[p]; dp.veiculos+=d.veiculos||0; dp.drogas+=d.drogas||0; dp.fuzil+=d.fuzil||0; dp.pistola+=d.pistola||0; dp.smg+=d.smg||0; dp.explosivos+=d.explosivos||0; dp.dinheiro+=d.dinheiro||0; dp.municoes+=d.municoes||0; dp.pontos+=d.pontos;});});
+  dados.forEach(d=>{
+    [d.chefe,d.p1,d.p3,d.p4].forEach(p=>{
+      if(!p) return;
+      if(!r[p]) r[p]={veiculos:0,drogas:0,fuzil:0,pistola:0,smg:0,explosivos:0,dinheiro:0,municoes:0,pontos:0};
+      r[p].veiculos += d.veiculos||0;
+      r[p].drogas += d.drogas||0;
+      r[p].fuzil += d.fuzil||0;
+      r[p].pistola += d.pistola||0;
+      r[p].smg += d.smg||0;
+      r[p].explosivos += d.explosivos||0;
+      r[p].dinheiro += d.dinheiro||0;
+      r[p].municoes += d.municoes||0;
+      r[p].pontos += d.pontos;
+    });
+  });
+
   let ord=Object.entries(r).sort((a,b)=>b[1].pontos-a[1].pontos);
   rankingTabela.innerHTML="";
-  ord.forEach((e,i)=>{let d=e[1];
+  ord.forEach((e,i)=>{
+    let d=e[1];
     rankingTabela.innerHTML+=`<tr>
       <td>${i+1}</td>
       <td>${e[0]}</td>
@@ -449,4 +498,69 @@ function ranking(){
 window.rankingMensal=()=>{
   let m=mes.value;
   let r={};
-  dados
+  dados.forEach(d=>{
+    if(d.data && d.data.startsWith(m)){
+      [d.chefe,d.p1,d.p3,d.p4].forEach(p=>{
+        if(!p) return;
+        if(!r[p]) r[p]={veiculos:0,drogas:0,fuzil:0,pistola:0,smg:0,explosivos:0,dinheiro:0,municoes:0,pontos:0};
+        r[p].veiculos += d.veiculos||0;
+        r[p].drogas += d.drogas||0;
+        r[p].fuzil += d.fuzil||0;
+        r[p].pistola += d.pistola||0;
+        r[p].smg += d.smg||0;
+        r[p].explosivos += d.explosivos||0;
+        r[p].dinheiro += d.dinheiro||0;
+        r[p].municoes += d.municoes||0;
+        r[p].pontos += d.pontos;
+      });
+    }
+  });
+
+  let ord=Object.entries(r).sort((a,b)=>b[1].pontos-a[1].pontos);
+  mensalTabela.innerHTML="";
+  ord.forEach((e,i)=>{
+    let d=e[1];
+    mensalTabela.innerHTML+=`<tr>
+      <td>${i+1}</td>
+      <td>${e[0]}</td>
+      <td>${formatNum(d.pontos.toFixed(1))}</td>
+      <td>${formatNum(d.veiculos)}</td>
+      <td>${formatNum(d.drogas)}</td>
+      <td>${formatNum(d.fuzil)}</td>
+      <td>${formatNum(d.pistola)}</td>
+      <td>${formatNum(d.smg)}</td>
+      <td>${formatNum(d.explosivos)}</td>
+      <td>${formatNum(d.dinheiro)}</td>
+      <td>${formatNum(d.municoes)}</td>
+    </tr>`;
+  });
+};
+
+/* RANKING INDIVIDUAL SIMPLES */
+function rankingIndividual(){
+  let r={};
+  dados.forEach(d=>{[d.chefe,d.p1,d.p3,d.p4].forEach(p=>{if(!p)return;r[p]=(r[p]||0)+d.pontos;});});
+  individualTabela.innerHTML="";
+  Object.entries(r).forEach((e,i)=>{individualTabela.innerHTML+=`<tr><td>${i+1}</td><td>${e[0]}</td><td>${formatNum(e[1].toFixed(1))}</td></tr>`;});
+}
+
+/* GRAFICO */
+function graf(){
+  let t={veiculos:0,drogas:0,fuzil:0,pistola:0,smg:0,explosivos:0,dinheiro:0,municoes:0};
+  dados.forEach(d=>Object.keys(t).forEach(k=>t[k]+=d[k]));
+  if(grafico) grafico.destroy();
+  grafico=new Chart(document.getElementById("grafico"),{
+    type:"bar",
+    data:{labels:Object.keys(t),datasets:[{data:Object.values(t),backgroundColor:['#22c55e','#1c7b46','#16a34a','#4ade80','#22c55e','#1c7b46','#16a34a','#4ade80']}]},
+    options:{plugins:{legend:{display:false}}}
+  });
+}
+
+/* NAV */
+window.mostrar=id=>{
+  ["relatorio","ranking","mensal","individual","cadastro"].forEach(p=>document.getElementById(p).style.display="none");
+  document.getElementById(id).style.display="block";
+};
+</script>
+</body>
+</html>
