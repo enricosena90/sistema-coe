@@ -2,7 +2,7 @@
 <html lang="pt-br">
 <head>
 <meta charset="UTF-8">
-<title>COE Sistema 💀</title>
+<title>Sistema COE 💀</title>
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 <style>
 body {
@@ -329,12 +329,41 @@ window.resetarSistema=async()=>{
   let r=await getDocs(collection(db,"relatorios")); r.forEach(d=>deleteDoc(doc(db,"relatorios",d.id)));
 };
 
-/* RESET RANKING */
-window.resetRanking=async()=>{
-  if(!confirm("Confirma reset do Ranking?")) return;
-  let r=await getDocs(collection(db,"relatorios")); r.forEach(d=>{
-    deleteDoc(doc(db,"relatorios",d.id));
+/* RESET RANKING GERAL (sem apagar relatórios) */
+window.resetRanking = () => {
+  if(!confirm("Confirma reset do Ranking Geral?")) return;
+
+  // Limpa a tabela do ranking
+  rankingTabela.innerHTML = "";
+
+  // Cria um objeto temporário com todos os policiais zerados
+  let r = {};
+  dados.forEach(d => {
+    [d.chefe,d.p1,d.p3,d.p4].forEach(p => {
+      if(!p) return;
+      if(!r[p]) r[p] = {veiculos:0, drogas:0, fuzil:0, pistola:0, smg:0, explosivos:0, dinheiro:0, municoes:0, pontos:0};
+    });
   });
+
+  // Preenche a tabela zerada do Ranking Geral
+  Object.keys(r).forEach((nome, i) => {
+    let d = r[nome];
+    rankingTabela.innerHTML += `<tr>
+      <td>${i+1}</td>
+      <td>${nome}</td>
+      <td>${formatNum(d.pontos.toFixed(1))}</td>
+      <td>${formatNum(d.veiculos)}</td>
+      <td>${formatNum(d.drogas)}</td>
+      <td>${formatNum(d.fuzil)}</td>
+      <td>${formatNum(d.pistola)}</td>
+      <td>${formatNum(d.smg)}</td>
+      <td>${formatNum(d.explosivos)}</td>
+      <td>${formatNum(d.dinheiro)}</td>
+      <td>${formatNum(d.municoes)}</td>
+    </tr>`;
+  });
+
+  alert("Ranking Geral resetado sem afetar Ranking Mensal ou Individual!");
 };
 
 /* TEMPO REAL */
