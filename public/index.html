@@ -293,19 +293,13 @@ function formatNum(n){return n.toLocaleString('pt-BR');}
 
 /* LOGIN */
 window.logar = ()=>{
-  let u = user.value.trim();
-  let s = pass.value.trim();
-
-  if(u === "oficial" && s === "1510"){
-    localStorage.setItem("nivel", "oficial"); // permissões admin
-  } else if(u === "praca" && s === "1234"){
-    localStorage.setItem("nivel", "praca");   // permissões user
-  } else {
-    return alert("Erro de login");
-  }
-
-  login.style.display = "none";
-  sistema.style.display = "block";
+  let u=user.value;
+  let s=pass.value;
+  if(u==="oficial" && s==="1510"){localStorage.setItem("nivel","oficial");}
+  else if(u==="praça" && s==="1234"){localStorage.setItem("nivel","praca");}
+  else return alert("Erro de login");
+  login.style.display="none";
+  sistema.style.display="block";
   configPermissao();
 };
 function configPermissao(){
@@ -475,4 +469,28 @@ window.rankingMensal=()=>{
 /* RANKING INDIVIDUAL SIMPLES */
 function rankingIndividual(){
   let r={};
-  dados.forEach(d=>{[d.chefe,d.p1,d.p3,d.p4].forEach(p=>{if(!p)return;r
+  dados.forEach(d=>{[d.chefe,d.p1,d.p3,d.p4].forEach(p=>{if(!p)return;r[p]=(r[p]||0)+d.pontos;});});
+  individualTabela.innerHTML="";
+  Object.entries(r).forEach((e,i)=>{individualTabela.innerHTML+=`<tr><td>${i+1}</td><td>${e[0]}</td><td>${formatNum(e[1].toFixed(1))}</td></tr>`;});
+}
+
+/* GRAFICO */
+function graf(){
+  let t={veiculos:0,drogas:0,fuzil:0,pistola:0,smg:0,explosivos:0,dinheiro:0,municoes:0};
+  dados.forEach(d=>Object.keys(t).forEach(k=>t[k]+=d[k]));
+  if(grafico) grafico.destroy();
+  grafico=new Chart(document.getElementById("grafico"),{
+    type:"bar",
+    data:{labels:Object.keys(t),datasets:[{data:Object.values(t),backgroundColor:['#22c55e','#1c7b46','#16a34a','#4ade80','#22c55e','#1c7b46','#16a34a','#4ade80']}]},
+    options:{plugins:{legend:{display:false}}}
+  });
+}
+
+/* NAV */
+window.mostrar=id=>{
+  ["relatorio","ranking","mensal","individual","cadastro"].forEach(p=>document.getElementById(p).style.display="none");
+  document.getElementById(id).style.display="block";
+};
+</script>
+</body>
+</html>
