@@ -2,120 +2,48 @@
 <html lang="pt-br">
 <head>
 <meta charset="UTF-8">
-<title>COE Sistema</title>
+<title>COE Sistema 💀</title>
 
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 
 <style>
-body {
-  margin:0;
-  font-family:Arial;
-  display:flex;
-  background:#020617;
-  color:#e2e8f0;
-}
-
-.sidebar {
-  width:230px;
-  background:#02140f;
-  height:100vh;
-  padding:20px;
-}
-
-.logo {
-  color:#22c55e;
-  font-size:20px;
-  margin-bottom:20px;
-}
-
-.menu-item {
-  padding:10px;
-  cursor:pointer;
-  border-radius:5px;
-}
-
-.menu-item:hover {
-  background:#22c55e;
-  color:black;
-}
-
-.content {
-  flex:1;
-  padding:20px;
-}
-
-.card {
-  background:#020617;
-  border:1px solid #065f46;
-  padding:20px;
-  border-radius:10px;
-  margin-bottom:20px;
-}
-
-h3 { color:#22c55e; }
-
-.grid {
-  display:flex;
-  flex-wrap:wrap;
-  gap:10px;
-}
-
-.grid div { flex:1 1 180px; }
-
-input, select {
-  width:100%;
-  padding:10px;
-  background:black;
-  border:1px solid #065f46;
-  color:#22c55e;
-}
-
-button {
-  padding:10px;
-  background:#22c55e;
-  border:none;
-  margin-top:10px;
-  cursor:pointer;
-}
-
-table {
-  width:100%;
-  border-collapse:collapse;
-}
-
-th, td {
-  padding:10px;
-  border-bottom:1px solid #065f46;
-  text-align:center;
-}
-
-th { color:#22c55e; }
-
+body { margin:0; font-family:Arial; display:flex; background:#020617; color:white; }
+.sidebar { width:230px; background:#020617; border-right:2px solid #22c55e; padding:20px; }
+.logo { color:#22c55e; margin-bottom:20px; font-weight:bold; }
+.menu-item { padding:10px; cursor:pointer; border-radius:5px; }
+.menu-item:hover { background:#22c55e; color:black; }
+.content { flex:1; padding:20px; }
+.card { background:#020617; border:1px solid #22c55e; padding:15px; border-radius:10px; margin-bottom:20px; }
+.grid { display:flex; flex-wrap:wrap; gap:10px; }
+.grid div { flex:1 1 200px; }
+input,select { width:100%; padding:10px; background:black; color:white; border:1px solid #22c55e; }
+button { padding:10px; background:#22c55e; border:none; cursor:pointer; margin-top:10px; }
+table { width:100%; border-collapse:collapse; }
+th,td { padding:10px; border-bottom:1px solid #22c55e; text-align:center; }
 </style>
 </head>
 
 <body>
 
 <div class="sidebar">
-  <div class="logo">☠️ COE</div>
-  <div class="menu-item" onclick="mostrarRelatorio()">Relatório</div>
-  <div class="menu-item" onclick="mostrarRanking()">Ranking</div>
-  <div class="menu-item" onclick="mostrarRankingMensal()">Ranking Mensal</div>
-  <div class="menu-item" onclick="mostrarCadastro()">Cadastro</div>
+  <div class="logo">💀 COE</div>
+  <div class="menu-item" onclick="mostrar('relatorio')">Relatório</div>
+  <div class="menu-item" onclick="mostrar('ranking')">Ranking</div>
+  <div class="menu-item" onclick="mostrar('mensal')">Ranking Mensal</div>
+  <div class="menu-item" onclick="mostrar('individual')">Ranking Individual</div>
+  <div class="menu-item" onclick="mostrar('cadastro')">Cadastro</div>
 </div>
 
 <div class="content">
 
-<!-- RELATORIO -->
 <div id="relatorio">
-
 <div class="card">
 <h3>Equipe</h3>
 <div class="grid">
-<div><label>Chefe da Barca</label><select id="chefeSelect"></select></div>
-<div><label>P1</label><select id="p1Select"></select></div>
-<div><label>P3</label><select id="p3Select"></select></div>
-<div><label>P4</label><select id="p4Select"></select></div>
+<div><label>Chefe da Barca</label><select id="chefe"></select></div>
+<div><label>P1</label><select id="p1"></select></div>
+<div><label>P3</label><select id="p3"></select></div>
+<div><label>P4</label><select id="p4"></select></div>
 </div>
 </div>
 
@@ -143,71 +71,39 @@ th { color:#22c55e; }
 </div>
 </div>
 
-<button onclick="salvar()">Salvar Relatório</button>
-
+<button onclick="salvar()">Salvar</button>
 </div>
 
-<!-- RANKING -->
 <div id="ranking" style="display:none;">
 <div class="card">
-<h3>🏆 Ranking Geral</h3>
+<h3>🏆 Ranking</h3>
 <table>
-<thead>
-<tr>
-<th>#</th>
-<th>Policial</th>
-<th>Pontos</th>
-<th>Detalhes</th>
-</tr>
-</thead>
+<thead><tr><th>#</th><th>Nome</th><th>Pontos</th></tr></thead>
 <tbody id="rankingTabela"></tbody>
 </table>
 </div>
 </div>
 
-<!-- RANKING MENSAL -->
-<div id="rankingMensal" style="display:none;">
+<div id="mensal" style="display:none;">
 <div class="card">
-<h3>📅 Ranking Mensal</h3>
-<input type="month" id="mesFiltro" onchange="carregarRankingMensal()">
-
-<table>
-<thead>
-<tr>
-<th>#</th>
-<th>Policial</th>
-<th>Pontos</th>
-</tr>
-</thead>
-<tbody id="rankingMensalTabela"></tbody>
-</table>
+<input type="month" id="mes" onchange="rankingMensal()">
+<table><tbody id="mensalTabela"></tbody></table>
 </div>
 </div>
 
-<!-- CADASTRO -->
+<div id="individual" style="display:none;">
+<div class="card">
+<table><tbody id="individualTabela"></tbody></table>
+</div>
+</div>
+
 <div id="cadastro" style="display:none;">
 <div class="card">
-<h3>Cadastro</h3>
-
-<div class="grid">
-<input id="nomePolicial" placeholder="Nome">
-<input id="rgPolicial" placeholder="RG">
-<input id="patentePolicial" placeholder="Patente">
-</div>
-
-<button onclick="cadastrarPolicial()">Cadastrar</button>
-
-<table>
-<thead>
-<tr>
-<th>Nome</th>
-<th>RG</th>
-<th>Patente</th>
-</tr>
-</thead>
-<tbody id="listaPoliciais"></tbody>
-</table>
-
+<input id="nome" placeholder="Nome">
+<input id="rg" placeholder="RG">
+<input id="patente" placeholder="Patente">
+<button onclick="cadastrar()">Cadastrar</button>
+<table><tbody id="lista"></tbody></table>
 </div>
 </div>
 
@@ -215,65 +111,73 @@ th { color:#22c55e; }
 
 <script type="module">
 import { initializeApp } from "https://www.gstatic.com/firebasejs/12.11.0/firebase-app.js";
-import { getFirestore, collection, addDoc, getDocs } from "https://www.gstatic.com/firebasejs/12.11.0/firebase-firestore.js";
+import { getFirestore, collection, addDoc, onSnapshot } from "https://www.gstatic.com/firebasejs/12.11.0/firebase-firestore.js";
 
 const firebaseConfig = {
-  apiKey: "SUA_KEY",
-  authDomain: "SEU_AUTH",
-  projectId: "SEU_PROJECT"
+  apiKey: "AIzaSyBiv7jmqW6ELU6yxCSu7n18Qy_SHrbRmw4",
+  authDomain: "sistema-coe-ff00a.firebaseapp.com",
+  projectId: "sistema-coe-ff00a"
 };
 
 const app = initializeApp(firebaseConfig);
 const db = getFirestore(app);
 
-let policiais=[];
+let dados = [];
+let policiais = [];
 
 /* CADASTRO */
-window.cadastrarPolicial = async ()=>{
-  await addDoc(collection(db,"policiais"),{
-    nome:nomePolicial.value,
-    rg:rgPolicial.value,
-    patente:patentePolicial.value
+window.cadastrar = ()=>{
+  addDoc(collection(db,"policiais"),{
+    nome:nome.value,
+    rg:rg.value,
+    patente:patente.value
   });
-  carregarPoliciais();
 };
 
-/* CARREGAR POLICIAIS */
-async function carregarPoliciais(){
-  let snap=await getDocs(collection(db,"policiais"));
-  policiais=[];
-  listaPoliciais.innerHTML="";
+/* TEMPO REAL POLICIAIS */
+window.addEventListener("load", ()=>{
 
-  snap.forEach(docu=>{
-    let p=docu.data();
-    policiais.push(p);
+  onSnapshot(collection(db,"policiais"), snap=>{
+    lista.innerHTML="";
+    chefe.innerHTML="<option></option>";
+    p1.innerHTML="<option></option>";
+    p3.innerHTML="<option></option>";
+    p4.innerHTML="<option></option>";
 
-    listaPoliciais.innerHTML+=`
-    <tr>
-    <td>${p.nome}</td>
-    <td>${p.rg}</td>
-    <td>${p.patente}</td>
-    </tr>`;
-  });
+    snap.forEach(doc=>{
+      let p=doc.data();
 
-  atualizarSelects();
-}
+      lista.innerHTML+=`<tr><td>${p.nome} (${p.patente})</td></tr>`;
 
-/* SELECT */
-function atualizarSelects(){
-  let selects=[chefeSelect,p1Select,p3Select,p4Select];
-  selects.forEach(s=>{
-    s.innerHTML="<option>Selecionar</option>";
-    policiais.forEach(p=>{
-      s.innerHTML+=`<option>${p.nome} (${p.patente})</option>`;
+      [chefe,p1,p3,p4].forEach(s=>{
+        s.innerHTML+=`<option>${p.nome}</option>`;
+      });
     });
   });
+
+  onSnapshot(collection(db,"relatorios"), snap=>{
+    dados=[];
+    snap.forEach(doc=>dados.push(doc.data()));
+
+    gerarRanking();
+    rankingMensal();
+    rankingIndividual();
+  });
+
+});
+
+/* PONTOS */
+function pontos(d){
+return d.veiculos*25+d.drogas*15+d.fuzil*40+d.pistola*10+d.smg*15+d.explosivos*15+d.dinheiro*0.2+d.municoes*5;
 }
 
 /* SALVAR */
-window.salvar = async ()=>{
-  await addDoc(collection(db,"relatorios"),{
-    chefe:chefeSelect.value,
+window.salvar = ()=>{
+  let d={
+    chefe:chefe.value,
+    p1:p1.value,
+    p3:p3.value,
+    p4:p4.value,
     data:data.value,
     veiculos:+veiculos.value||0,
     drogas:+drogas.value||0,
@@ -283,81 +187,74 @@ window.salvar = async ()=>{
     explosivos:+explosivos.value||0,
     dinheiro:+dinheiro.value||0,
     municoes:+municoes.value||0
-  });
-  carregarRanking();
+  };
+  d.pontos=pontos(d);
+  addDoc(collection(db,"relatorios"),d);
 };
 
 /* RANKING */
-async function carregarRanking(){
-  let snap=await getDocs(collection(db,"relatorios"));
-  let r={};
+function gerarRanking(){
+let r={};
+dados.forEach(d=>{
+if(!d.chefe)return;
+r[d.chefe]=(r[d.chefe]||0)+d.pontos;
+});
 
-  snap.forEach(docu=>{
-    let d=docu.data();
+let ord=Object.entries(r).sort((a,b)=>b[1]-a[1]);
 
-    if(!r[d.chefe]) r[d.chefe]={p:0,d:""};
-
-    let pontos = d.fuzil*40 + d.pistola*10 + d.smg*15 + d.veiculos*25 + d.drogas*15 + d.explosivos*15 + d.municoes*5;
-
-    r[d.chefe].p+=pontos;
-
-    r[d.chefe].d += `F:${d.fuzil} P:${d.pistola} SMG:${d.smg} D:${d.drogas} $:${d.dinheiro} M:${d.municoes} E:${d.explosivos} | `;
-  });
-
-  let ord=Object.entries(r).sort((a,b)=>b[1].p-a[1].p);
-
-  rankingTabela.innerHTML="";
-
-  ord.forEach((e,i)=>{
-    let medalha = i==0?"🥇":i==1?"🥈":i==2?"🥉":"";
-    rankingTabela.innerHTML+=`
-    <tr>
-    <td>${medalha} ${i+1}</td>
-    <td>${e[0]}</td>
-    <td>${e[1].p}</td>
-    <td>${e[1].d}</td>
-    </tr>`;
-  });
+rankingTabela.innerHTML="";
+ord.forEach((e,i)=>{
+let m=i==0?"🥇":i==1?"🥈":i==2?"🥉":"";
+rankingTabela.innerHTML+=`<tr><td>${m}${i+1}</td><td>${e[0]}</td><td>${e[1].toFixed(1)}</td></tr>`;
+});
 }
 
 /* MENSAL */
-window.carregarRankingMensal = async ()=>{
-  let mes=mesFiltro.value;
-  if(!mes)return;
+window.rankingMensal=()=>{
+let mes=mes.value;
+let r={};
 
-  let snap=await getDocs(collection(db,"relatorios"));
-  let r={};
+dados.forEach(d=>{
+ if(d.data && d.data.startsWith(mes)){
+  r[d.chefe]=(r[d.chefe]||0)+d.pontos;
+ }
+});
 
-  snap.forEach(docu=>{
-    let d=docu.data();
+let ord=Object.entries(r).sort((a,b)=>b[1]-a[1]);
 
-    if(d.data && d.data.startsWith(mes)){
-      if(!r[d.chefe]) r[d.chefe]=0;
-      r[d.chefe]+= d.fuzil*40 + d.pistola*10;
-    }
-  });
-
-  let ord=Object.entries(r).sort((a,b)=>b[1]-a[1]);
-
-  rankingMensalTabela.innerHTML="";
-
-  ord.forEach((e,i)=>{
-    rankingMensalTabela.innerHTML+=`
-    <tr>
-    <td>${i+1}</td>
-    <td>${e[0]}</td>
-    <td>${e[1]}</td>
-    </tr>`;
-  });
+mensalTabela.innerHTML="";
+ord.forEach((e,i)=>{
+mensalTabela.innerHTML+=`<tr><td>${i+1}</td><td>${e[0]}</td><td>${e[1]}</td></tr>`;
+});
 };
 
-/* NAV */
-window.mostrarRelatorio=()=>{relatorio.style.display="block";ranking.style.display="none";rankingMensal.style.display="none";cadastro.style.display="none";}
-window.mostrarRanking=()=>{relatorio.style.display="none";ranking.style.display="block";rankingMensal.style.display="none";cadastro.style.display="none";carregarRanking();}
-window.mostrarRankingMensal=()=>{relatorio.style.display="none";ranking.style.display="none";rankingMensal.style.display="block";cadastro.style.display="none";}
-window.mostrarCadastro=()=>{relatorio.style.display="none";ranking.style.display="none";rankingMensal.style.display="none";cadastro.style.display="block";}
+/* INDIVIDUAL */
+function rankingIndividual(){
+let r={};
 
-carregarPoliciais();
+dados.forEach(d=>{
+[d.chefe,d.p1,d.p3,d.p4].forEach(p=>{
+if(!p)return;
+r[p]=(r[p]||0)+d.pontos/4;
+});
+});
+
+let ord=Object.entries(r).sort((a,b)=>b[1]-a[1]);
+
+individualTabela.innerHTML="";
+ord.forEach((e,i)=>{
+individualTabela.innerHTML+=`<tr><td>${i+1}</td><td>${e[0]}</td><td>${e[1].toFixed(1)}</td></tr>`;
+});
+}
+
+/* NAV */
+window.mostrar=(id)=>{
+["relatorio","ranking","mensal","individual","cadastro"].forEach(p=>{
+document.getElementById(p).style.display="none";
+});
+document.getElementById(id).style.display="block";
+};
+
 </script>
 
 </body>
