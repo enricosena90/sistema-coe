@@ -7,19 +7,78 @@
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 
 <style>
-body { margin:0; font-family:Arial; display:flex; background:#05080f; color:#fff;}
-.sidebar { width:240px; background:#0a0f1a; height:100vh; padding:20px;}
-.logo { color:#22c55e; margin-bottom:20px; font-weight:bold;}
-.menu-item { padding:10px; cursor:pointer; border-radius:5px;}
-.menu-item:hover { background:#22c55e; color:#000;}
-.content { flex:1; padding:20px;}
-.card { background:#0f172a; padding:20px; border-radius:10px; margin-bottom:20px;}
-.grid { display:flex; flex-wrap:wrap; gap:10px;}
-.grid div { flex:1 1 180px;}
-input, select { width:100%; padding:10px; border-radius:5px; border:none; background:#020617; color:white;}
-button { padding:10px; background:#22c55e; border:none; border-radius:5px; cursor:pointer;}
-table { width:100%; border-collapse:collapse; background:#020617;}
-th, td { padding:10px; text-align:center;}
+body {
+  margin: 0;
+  font-family: Arial;
+  display: flex;
+  background: #05080f;
+  color: #fff;
+}
+
+.sidebar {
+  width: 240px;
+  background: #0a0f1a;
+  height: 100vh;
+  padding: 20px;
+}
+
+.logo { color:#facc15; margin-bottom:20px; font-weight:bold; }
+
+.menu-item {
+  padding: 10px;
+  cursor: pointer;
+  border-radius: 5px;
+}
+
+.menu-item:hover { background:#facc15; color:#000; }
+
+.content { flex:1; padding:20px; }
+
+.card {
+  background:#0f172a;
+  padding:20px;
+  border-radius:10px;
+  margin-bottom:20px;
+}
+
+.grid {
+  display:flex;
+  flex-wrap:wrap;
+  gap:10px;
+}
+
+.grid div { flex:1 1 180px; }
+
+input, select {
+  width:100%;
+  padding:10px;
+  border:none;
+  border-radius:5px;
+  background:#020617;
+  color:white;
+}
+
+button {
+  padding:10px;
+  border:none;
+  border-radius:5px;
+  cursor:pointer;
+  background:#22c55e;
+  margin-top:10px;
+}
+
+.reset-btn { background:#ef4444; }
+
+table {
+  width:100%;
+  border-collapse:collapse;
+  background:#020617;
+}
+
+th, td {
+  padding:10px;
+  text-align:center;
+}
 </style>
 </head>
 
@@ -29,6 +88,8 @@ th, td { padding:10px; text-align:center;}
   <div class="logo">🚔 COE</div>
   <div class="menu-item" onclick="mostrar('relatorio')">Relatório</div>
   <div class="menu-item" onclick="mostrar('ranking')">Ranking</div>
+  <div class="menu-item" onclick="mostrar('rankingMensal')">Ranking Mensal</div>
+  <div class="menu-item" onclick="mostrar('rankingIndividual')">Ranking Individual</div>
   <div class="menu-item" onclick="mostrar('cadastro')">Cadastro</div>
 </div>
 
@@ -36,26 +97,57 @@ th, td { padding:10px; text-align:center;}
 
 <div id="relatorio">
 <div class="card">
-<select id="chefe"></select>
-<input id="veiculos" placeholder="Veículos">
-<input id="drogas" placeholder="Drogas">
-<button onclick="salvar()">Salvar</button>
+<h3>Equipe</h3>
+<div class="grid">
+<select id="chefeSelect"></select>
+<select id="p1Select"></select>
+<select id="p3Select"></select>
+<select id="p4Select"></select>
 </div>
+</div>
+
+<div class="card">
+<h3>Produtividade</h3>
+<div class="grid">
+<input id="veiculos" type="number" placeholder="Veículos">
+<input id="drogas" type="number" placeholder="Drogas">
+<input id="fuzil" type="number" placeholder="Fuzil">
+<input id="pistola" type="number" placeholder="Pistola">
+<input id="smg" type="number" placeholder="SMG">
+<input id="explosivos" type="number" placeholder="Explosivos">
+<input id="dinheiro" type="number" placeholder="Dinheiro">
+<input id="municoes" type="number" placeholder="Munições">
+</div>
+</div>
+
+<button onclick="salvar()">Salvar</button>
+<button onclick="resetar()" class="reset-btn">Resetar</button>
 </div>
 
 <div id="ranking" style="display:none">
 <div class="card">
-<table><tbody id="rankingTabela"></tbody></table>
+<table>
+<thead><tr><th>#</th><th>Nome</th><th>Pontos</th></tr></thead>
+<tbody id="rankingTabela"></tbody>
+</table>
 </div>
+<canvas id="grafico"></canvas>
+</div>
+
+<div id="rankingMensal" style="display:none">
+<input type="month" id="mesFiltro" onchange="gerarRankingMensal()">
+<table><tbody id="rankingMensalTabela"></tbody></table>
+</div>
+
+<div id="rankingIndividual" style="display:none">
+<table><tbody id="rankingIndividualTabela"></tbody></table>
 </div>
 
 <div id="cadastro" style="display:none">
-<div class="card">
-<input id="nome" placeholder="Nome">
-<input id="rg" placeholder="RG">
+<input id="nomePolicial" placeholder="Nome">
+<input id="rgPolicial" placeholder="RG">
 <button onclick="cadastrar()">Cadastrar</button>
-<table><tbody id="lista"></tbody></table>
-</div>
+<table><tbody id="listaPoliciais"></tbody></table>
 </div>
 
 </div>
@@ -65,7 +157,7 @@ import { initializeApp } from "https://www.gstatic.com/firebasejs/12.11.0/fireba
 import { getFirestore, collection, addDoc, getDocs } from "https://www.gstatic.com/firebasejs/12.11.0/firebase-firestore.js";
 
 const firebaseConfig = {
-  apiKey: "AIzaSy...",
+  apiKey: "AIzaSyBiv7jmqW6ELU6yxCSu7n18Qy_SHrbRmw4",
   authDomain: "sistema-coe-ff00a.firebaseapp.com",
   projectId: "sistema-coe-ff00a"
 };
@@ -73,44 +165,68 @@ const firebaseConfig = {
 const app = initializeApp(firebaseConfig);
 const db = getFirestore(app);
 
-let policiais = [];
-let dados = [];
+let dados=[];
+let policiais=[];
+let grafico;
 
-window.mostrar = function(t){
-  relatorio.style.display="none";
-  ranking.style.display="none";
-  cadastro.style.display="none";
-  document.getElementById(t).style.display="block";
+/* NAV */
+window.mostrar = function(sec){
+  ["relatorio","ranking","rankingMensal","rankingIndividual","cadastro"].forEach(id=>{
+    document.getElementById(id).style.display="none";
+  });
+  document.getElementById(sec).style.display="block";
 }
 
+/* CADASTRO */
 window.cadastrar = async function(){
   await addDoc(collection(db,"policiais"),{
-    nome:nome.value,
-    rg:rg.value
+    nome:nomePolicial.value,
+    rg:rgPolicial.value
   });
+  nomePolicial.value=""; rgPolicial.value="";
   carregarPoliciais();
 }
 
 async function carregarPoliciais(){
-  let snap = await getDocs(collection(db,"policiais"));
-  lista.innerHTML="";
-  chefe.innerHTML="";
+  let snap=await getDocs(collection(db,"policiais"));
   policiais=[];
+  listaPoliciais.innerHTML="";
   snap.forEach(d=>{
     let p=d.data();
     policiais.push(p);
-    lista.innerHTML+=`<tr><td>${p.nome}</td></tr>`;
-    chefe.innerHTML+=`<option>${p.nome}</option>`;
+    listaPoliciais.innerHTML+=`<tr><td>${p.nome}</td><td>${p.rg}</td></tr>`;
+  });
+  atualizarSelects();
+}
+
+function atualizarSelects(){
+  [chefeSelect,p1Select,p3Select,p4Select].forEach(s=>{
+    s.innerHTML="<option>Selecionar</option>";
+    policiais.forEach(p=>{
+      s.innerHTML+=`<option>${p.nome}</option>`;
+    });
   });
 }
 
+/* RELATORIO */
 window.salvar = async function(){
   let r={
-    chefe:chefe.value,
+    chefe:chefeSelect.value,
+    p1:p1Select.value,
+    p3:p3Select.value,
+    p4:p4Select.value,
+    data:new Date().toISOString(),
     veiculos:+veiculos.value||0,
-    drogas:+drogas.value||0
+    drogas:+drogas.value||0,
+    fuzil:+fuzil.value||0,
+    pistola:+pistola.value||0,
+    smg:+smg.value||0,
+    explosivos:+explosivos.value||0,
+    dinheiro:+dinheiro.value||0,
+    municoes:+municoes.value||0
   };
-  r.pontos=r.veiculos*25+r.drogas*15;
+
+  r.pontos = r.veiculos*25+r.drogas*15+r.fuzil*40+r.pistola*10+r.smg*15+r.explosivos*15+r.dinheiro*0.2+r.municoes*5;
 
   await addDoc(collection(db,"relatorios"),r);
   carregarRelatorios();
@@ -121,8 +237,10 @@ async function carregarRelatorios(){
   dados=[];
   snap.forEach(d=>dados.push(d.data()));
   gerarRanking();
+  gerarRankingMensal();
 }
 
+/* RANKING */
 function gerarRanking(){
   let r={};
   dados.forEach(d=>{
@@ -130,12 +248,61 @@ function gerarRanking(){
     r[d.chefe]+=d.pontos;
   });
 
+  let ord=Object.entries(r).sort((a,b)=>b[1]-a[1]);
+
   rankingTabela.innerHTML="";
-  Object.entries(r).forEach(e=>{
-    rankingTabela.innerHTML+=`<tr><td>${e[0]}</td><td>${e[1]}</td></tr>`;
+  ord.forEach((e,i)=>{
+    let m=i==0?"🥇":i==1?"🥈":i==2?"🥉":"";
+    rankingTabela.innerHTML+=`<tr><td>${m} ${i+1}</td><td>${e[0]}</td><td>${e[1]}</td></tr>`;
   });
 }
 
+/* INDIVIDUAL */
+window.gerarRankingIndividual=function(){
+  let r={};
+  dados.forEach(d=>{
+    [d.chefe,d.p1,d.p3,d.p4].forEach(p=>{
+      if(!p)return;
+      if(!r[p])r[p]=0;
+      r[p]+=d.pontos/4;
+    });
+  });
+
+  let ord=Object.entries(r).sort((a,b)=>b[1]-a[1]);
+
+  rankingIndividualTabela.innerHTML="";
+  ord.forEach((e,i)=>{
+    rankingIndividualTabela.innerHTML+=`<tr><td>${i+1}</td><td>${e[0]}</td><td>${e[1]}</td></tr>`;
+  });
+}
+
+/* MENSAL */
+window.gerarRankingMensal=function(){
+  let mes=mesFiltro.value;
+  if(!mes)return;
+
+  let r={};
+  dados.forEach(d=>{
+    if(d.data.startsWith(mes)){
+      if(!r[d.chefe])r[d.chefe]=0;
+      r[d.chefe]+=d.pontos;
+    }
+  });
+
+  let ord=Object.entries(r).sort((a,b)=>b[1]-a[1]);
+
+  rankingMensalTabela.innerHTML="";
+  ord.forEach((e,i)=>{
+    rankingMensalTabela.innerHTML+=`<tr><td>${i+1}</td><td>${e[0]}</td><td>${e[1]}</td></tr>`;
+  });
+}
+
+/* RESET */
+window.resetar=function(){
+  alert("Apague direto no Firebase (Firestore)");
+}
+
+/* INIT */
 carregarPoliciais();
 carregarRelatorios();
 </script>
