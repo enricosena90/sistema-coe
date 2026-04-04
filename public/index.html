@@ -293,13 +293,19 @@ function formatNum(n){return n.toLocaleString('pt-BR');}
 
 /* LOGIN */
 window.logar = ()=>{
-  let u=user.value;
-  let s=pass.value;
-  if(u==="admin" && s==="1510"){localStorage.setItem("nivel","oficial");}
-  else if(u==="user" && s==="1234"){localStorage.setItem("nivel","praca");}
-  else return alert("Erro de login");
-  login.style.display="none";
-  sistema.style.display="block";
+  let u = user.value.trim();
+  let s = pass.value.trim();
+
+  if(u === "oficial" && s === "1510"){
+    localStorage.setItem("nivel", "oficial"); // permissões admin
+  } else if(u === "praca" && s === "1234"){
+    localStorage.setItem("nivel", "praca");   // permissões user
+  } else {
+    return alert("Erro de login");
+  }
+
+  login.style.display = "none";
+  sistema.style.display = "block";
   configPermissao();
 };
 function configPermissao(){
