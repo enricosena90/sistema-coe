@@ -8,8 +8,6 @@
 
 <style>
 body { margin:0; font-family:Arial; background:#020617; color:white; }
-.login { display:flex; justify-content:center; align-items:center; height:100vh; }
-.box { background:#020617; border:1px solid #22c55e; padding:20px; border-radius:10px; }
 .sidebar { width:230px; background:#020617; border-right:2px solid #22c55e; padding:20px; height:100vh; position:fixed; }
 .content { margin-left:250px; padding:20px; }
 .menu-item { padding:10px; cursor:pointer; }
@@ -23,25 +21,13 @@ td,th { border-bottom:1px solid #22c55e; padding:5px; text-align:center; font-si
 
 <body>
 
-<!-- LOGIN -->
-<div id="login" class="login">
-<div class="box">
-<h3>Login COE 💀</h3>
-<input id="user" placeholder="Usuário">
-<input id="pass" type="password" placeholder="Senha">
-<button onclick="logar()">Entrar</button>
-</div>
-</div>
-
-<!-- SISTEMA -->
-<div id="sistema" style="display:none;">
-
 <div class="sidebar">
 <div class="menu-item" onclick="mostrar('relatorio')">Relatório</div>
 <div class="menu-item" onclick="mostrar('ranking')">Ranking</div>
 <div class="menu-item" onclick="mostrar('mensal')">Ranking Mensal</div>
-<div class="menu-item" onclick="mostrar('cadastro')" id="menuCadastro">Cadastro</div>
-<div class="menu-item" onclick="resetarSistema()" id="menuReset" style="color:red;">Reset</div>
+<div class="menu-item" onclick="mostrar('individual')">Ranking Individual</div>
+<div class="menu-item" onclick="mostrar('cadastro')">Cadastro</div>
+<div class="menu-item" onclick="resetarSistema()" style="color:red;">Reset</div>
 </div>
 
 <div class="content">
@@ -57,10 +43,15 @@ td,th { border-bottom:1px solid #22c55e; padding:5px; text-align:center; font-si
 </div>
 
 <div class="card">
+<h3>Ronda</h3>
+<input id="vtr" placeholder="Viatura">
 <input type="date" id="data">
+<input type="time" id="inicio">
+<input type="time" id="fim">
 </div>
 
 <div class="card">
+<h3>Produtividade</h3>
 <input id="veiculos" placeholder="Veículos">
 <input id="drogas" placeholder="Drogas">
 <input id="fuzil" placeholder="Fuzil">
@@ -94,16 +85,20 @@ td,th { border-bottom:1px solid #22c55e; padding:5px; text-align:center; font-si
 <table><tbody id="mensalTabela"></tbody></table>
 </div>
 
-<!-- CADASTRO -->
-<div id="cadastro" style="display:none;">
-<input id="nome">
-<input id="rg">
-<input id="patente">
-<button onclick="cadastrar()">Cadastrar</button>
-<table id="lista"></table>
+<!-- INDIVIDUAL -->
+<div id="individual" style="display:none;">
+<table><tbody id="individualTabela"></tbody></table>
 </div>
 
+<!-- CADASTRO -->
+<div id="cadastro" style="display:none;">
+<input id="nome" placeholder="Nome">
+<input id="rg" placeholder="RG">
+<input id="patente" placeholder="Patente">
+<button onclick="cadastrar()">Cadastrar</button>
+<table><tbody id="lista"></tbody></table>
 </div>
+
 </div>
 
 <script type="module">
@@ -121,34 +116,17 @@ const db = getFirestore(app);
 let dados=[];
 let grafico;
 
-/* LOGIN */
-window.logar=()=>{
-let u=user.value;
-let s=pass.value;
-
-if(u==="admin" && s==="1510"){
-localStorage.setItem("nivel","admin");
-}else if(u==="user" && s==="1234"){
-localStorage.setItem("nivel","user");
-}else return alert("Erro");
-
-login.style.display="none";
-sistema.style.display="block";
-configPermissao();
-};
-
-function configPermissao(){
-let nivel=localStorage.getItem("nivel");
-
-if(nivel!=="admin"){
-menuCadastro.style.display="none";
-menuReset.style.display="none";
-}
-}
-
 /* CADASTRO */
 window.cadastrar=async()=>{
-await addDoc(collection(db,"policiais"),{nome:nome.value,rg:rg.value,patente:patente.value});
+await addDoc(collection(db,"policiais"),{
+nome:nome.value,rg:rg.value,patente:patente.value
+});
+};
+
+/* EXCLUIR */
+window.excluir=id=>{
+if(confirm("Excluir policial?"))
+deleteDoc(doc(db,"policiais",id));
 };
 
 /* RESET */
@@ -162,8 +140,6 @@ r.forEach(d=>deleteDoc(doc(db,"relatorios",d.id)));
 
 /* TEMPO REAL */
 window.onload=()=>{
-configPermissao();
-
 onSnapshot(collection(db,"policiais"),snap=>{
 lista.innerHTML="";
 chefe.innerHTML=p1.innerHTML=p3.innerHTML=p4.innerHTML="<option></option>";
@@ -179,22 +155,26 @@ dados=[];
 snap.forEach(d=>dados.push(d.data()));
 ranking();
 rankingMensal();
+rankingIndividual();
 graf();
 });
 };
 
-/* EXCLUIR */
-window.excluir=id=>deleteDoc(doc(db,"policiais",id));
+/* PONTOS */
+function pts(d){
+return d.veiculos*25+d.drogas*15+d.fuzil*40+d.pistola*10+d.smg*15+d.explosivos*15+d.dinheiro*0.2+d.municoes*5;
+}
 
 /* SALVAR */
 window.salvar=async()=>{
 let d={
-chefe:chefe.value,p1:p1.value,p3:p3.value,p4:p4.value,data:data.value,
+chefe:chefe.value,p1:p1.value,p3:p3.value,p4:p4.value,
+vtr:vtr.value,data:data.value,inicio:inicio.value,fim:fim.value,
 veiculos:+veiculos.value||0,drogas:+drogas.value||0,fuzil:+fuzil.value||0,
 pistola:+pistola.value||0,smg:+smg.value||0,explosivos:+explosivos.value||0,
 dinheiro:+dinheiro.value||0,municoes:+municoes.value||0
 };
-d.pontos=d.veiculos*25+d.drogas*15+d.fuzil*40+d.pistola*10+d.smg*15+d.explosivos*15+d.dinheiro*0.2+d.municoes*5;
+d.pontos=pts(d);
 await addDoc(collection(db,"relatorios"),d);
 };
 
@@ -238,12 +218,25 @@ mensalTabela.innerHTML+=`<tr><td>${i+1}</td><td>${e[0]}</td><td>${e[1]}</td></tr
 });
 };
 
+/* INDIVIDUAL */
+function rankingIndividual(){
+let r={};
+dados.forEach(d=>{
+[d.chefe,d.p1,d.p3,d.p4].forEach(p=>{
+if(!p)return;
+r[p]=(r[p]||0)+d.pontos/4;
+});
+});
+individualTabela.innerHTML="";
+Object.entries(r).forEach((e,i)=>{
+individualTabela.innerHTML+=`<tr><td>${i+1}</td><td>${e[0]}</td><td>${e[1].toFixed(1)}</td></tr>`;
+});
+}
+
 /* GRAFICO */
 function graf(){
 let t={veiculos:0,drogas:0,fuzil:0,pistola:0,smg:0,explosivos:0,dinheiro:0,municoes:0};
-dados.forEach(d=>{
-Object.keys(t).forEach(k=>t[k]+=d[k]);
-});
+dados.forEach(d=>Object.keys(t).forEach(k=>t[k]+=d[k]));
 if(grafico)grafico.destroy();
 grafico=new Chart(document.getElementById("grafico"),{
 type:"bar",
@@ -253,7 +246,7 @@ data:{labels:Object.keys(t),datasets:[{data:Object.values(t)}]}
 
 /* NAV */
 window.mostrar=id=>{
-["relatorio","ranking","mensal","cadastro"].forEach(p=>document.getElementById(p).style.display="none");
+["relatorio","ranking","mensal","individual","cadastro"].forEach(p=>document.getElementById(p).style.display="none");
 document.getElementById(id).style.display="block";
 };
 </script>
