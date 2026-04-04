@@ -32,6 +32,10 @@ th,td { padding:10px; border-bottom:1px solid #22c55e; text-align:center; }
   <div class="menu-item" onclick="mostrar('mensal')">Ranking Mensal</div>
   <div class="menu-item" onclick="mostrar('individual')">Ranking Individual</div>
   <div class="menu-item" onclick="mostrar('cadastro')">Cadastro</div>
+
+  <div class="menu-item" onclick="resetarSistema()" style="background:red;color:white;margin-top:20px;">
+    💀 Resetar Sistema
+  </div>
 </div>
 
 <div class="content">
@@ -40,7 +44,7 @@ th,td { padding:10px; border-bottom:1px solid #22c55e; text-align:center; }
 <div class="card">
 <h3>Equipe</h3>
 <div class="grid">
-<div><label>Chefe da Barca</label><select id="chefe"></select></div>
+<div><label>Chefe</label><select id="chefe"></select></div>
 <div><label>P1</label><select id="p1"></select></div>
 <div><label>P3</label><select id="p3"></select></div>
 <div><label>P4</label><select id="p4"></select></div>
@@ -50,10 +54,7 @@ th,td { padding:10px; border-bottom:1px solid #22c55e; text-align:center; }
 <div class="card">
 <h3>Ronda</h3>
 <div class="grid">
-<input id="vtr" placeholder="Viatura">
 <input type="date" id="data">
-<input type="time" id="inicio">
-<input type="time" id="fim">
 </div>
 </div>
 
@@ -66,7 +67,7 @@ th,td { padding:10px; border-bottom:1px solid #22c55e; text-align:center; }
 <input id="pistola" type="number" placeholder="Pistola">
 <input id="smg" type="number" placeholder="SMG">
 <input id="explosivos" type="number" placeholder="Explosivos">
-<input id="dinheiro" type="number" placeholder="Dinheiro Sujo">
+<input id="dinheiro" type="number" placeholder="Dinheiro">
 <input id="municoes" type="number" placeholder="Munições">
 </div>
 </div>
@@ -111,7 +112,15 @@ th,td { padding:10px; border-bottom:1px solid #22c55e; text-align:center; }
 
 <script type="module">
 import { initializeApp } from "https://www.gstatic.com/firebasejs/12.11.0/firebase-app.js";
-import { getFirestore, collection, addDoc, onSnapshot } from "https://www.gstatic.com/firebasejs/12.11.0/firebase-firestore.js";
+import { 
+  getFirestore, 
+  collection, 
+  addDoc, 
+  onSnapshot,
+  getDocs,
+  deleteDoc,
+  doc
+} from "https://www.gstatic.com/firebasejs/12.11.0/firebase-firestore.js";
 
 const firebaseConfig = {
   apiKey: "AIzaSyBiv7jmqW6ELU6yxCSu7n18Qy_SHrbRmw4",
@@ -122,19 +131,40 @@ const firebaseConfig = {
 const app = initializeApp(firebaseConfig);
 const db = getFirestore(app);
 
+/* ELEMENTOS */
+const nomeInput = document.getElementById("nome");
+const rgInput = document.getElementById("rg");
+const patenteInput = document.getElementById("patente");
+
+const lista = document.getElementById("lista");
+const chefe = document.getElementById("chefe");
+const p1 = document.getElementById("p1");
+const p3 = document.getElementById("p3");
+const p4 = document.getElementById("p4");
+
+const rankingTabela = document.getElementById("rankingTabela");
+const mensalTabela = document.getElementById("mensalTabela");
+const individualTabela = document.getElementById("individualTabela");
+const mesInput = document.getElementById("mes");
+
 let dados = [];
-let policiais = [];
 
 /* CADASTRO */
-window.cadastrar = ()=>{
-  addDoc(collection(db,"policiais"),{
-    nome:nome.value,
-    rg:rg.value,
-    patente:patente.value
+window.cadastrar = async ()=>{
+  if(!nomeInput.value) return alert("Digite o nome");
+
+  await addDoc(collection(db,"policiais"),{
+    nome:nomeInput.value,
+    rg:rgInput.value,
+    patente:patenteInput.value
   });
+
+  nomeInput.value="";
+  rgInput.value="";
+  patenteInput.value="";
 };
 
-/* TEMPO REAL POLICIAIS */
+/* TEMPO REAL */
 window.addEventListener("load", ()=>{
 
   onSnapshot(collection(db,"policiais"), snap=>{
@@ -145,19 +175,22 @@ window.addEventListener("load", ()=>{
     p4.innerHTML="<option></option>";
 
     snap.forEach(doc=>{
-      let p=doc.data();
+      let p = doc.data();
 
-      lista.innerHTML+=`<tr><td>${p.nome} (${p.patente})</td></tr>`;
+      lista.innerHTML += `<tr><td>${p.nome} (${p.patente})</td></tr>`;
 
       [chefe,p1,p3,p4].forEach(s=>{
-        s.innerHTML+=`<option>${p.nome}</option>`;
+        s.innerHTML += `<option value="${p.nome}">${p.nome}</option>`;
       });
     });
   });
 
   onSnapshot(collection(db,"relatorios"), snap=>{
-    dados=[];
-    snap.forEach(doc=>dados.push(doc.data()));
+    dados = [];
+
+    snap.forEach(doc=>{
+      dados.push(doc.data());
+    });
 
     gerarRanking();
     rankingMensal();
@@ -172,75 +205,89 @@ return d.veiculos*25+d.drogas*15+d.fuzil*40+d.pistola*10+d.smg*15+d.explosivos*1
 }
 
 /* SALVAR */
-window.salvar = ()=>{
+window.salvar = async ()=>{
   let d={
     chefe:chefe.value,
     p1:p1.value,
     p3:p3.value,
     p4:p4.value,
-    data:data.value,
-    veiculos:+veiculos.value||0,
-    drogas:+drogas.value||0,
-    fuzil:+fuzil.value||0,
-    pistola:+pistola.value||0,
-    smg:+smg.value||0,
-    explosivos:+explosivos.value||0,
-    dinheiro:+dinheiro.value||0,
-    municoes:+municoes.value||0
+    data:document.getElementById("data").value,
+    veiculos:+document.getElementById("veiculos").value||0,
+    drogas:+document.getElementById("drogas").value||0,
+    fuzil:+document.getElementById("fuzil").value||0,
+    pistola:+document.getElementById("pistola").value||0,
+    smg:+document.getElementById("smg").value||0,
+    explosivos:+document.getElementById("explosivos").value||0,
+    dinheiro:+document.getElementById("dinheiro").value||0,
+    municoes:+document.getElementById("municoes").value||0
   };
-  d.pontos=pontos(d);
-  addDoc(collection(db,"relatorios"),d);
+
+  d.pontos = pontos(d);
+
+  await addDoc(collection(db,"relatorios"), d);
+
+  alert("Salvo com sucesso 🚀");
 };
 
-/* RANKING */
+/* RESET COM SENHA */
+window.resetarSistema = async () => {
+
+  const senha = prompt("🔐 Digite a senha para resetar:");
+  if (senha !== "1510") return alert("❌ Senha incorreta");
+
+  if (!confirm("⚠️ Apagar TODOS os dados?")) return;
+
+  const policiaisSnap = await getDocs(collection(db,"policiais"));
+  for (const d of policiaisSnap.docs) {
+    await deleteDoc(doc(db,"policiais",d.id));
+  }
+
+  const relatoriosSnap = await getDocs(collection(db,"relatorios"));
+  for (const d of relatoriosSnap.docs) {
+    await deleteDoc(doc(db,"relatorios",d.id));
+  }
+
+  alert("🔥 Sistema resetado");
+};
+
+/* RANKINGS */
 function gerarRanking(){
 let r={};
 dados.forEach(d=>{
 if(!d.chefe)return;
 r[d.chefe]=(r[d.chefe]||0)+d.pontos;
 });
-
 let ord=Object.entries(r).sort((a,b)=>b[1]-a[1]);
-
 rankingTabela.innerHTML="";
 ord.forEach((e,i)=>{
-let m=i==0?"🥇":i==1?"🥈":i==2?"🥉":"";
-rankingTabela.innerHTML+=`<tr><td>${m}${i+1}</td><td>${e[0]}</td><td>${e[1].toFixed(1)}</td></tr>`;
+rankingTabela.innerHTML+=`<tr><td>${i+1}</td><td>${e[0]}</td><td>${e[1].toFixed(1)}</td></tr>`;
 });
 }
 
-/* MENSAL */
 window.rankingMensal=()=>{
-let mes=mes.value;
+let mes=mesInput.value;
 let r={};
-
 dados.forEach(d=>{
- if(d.data && d.data.startsWith(mes)){
+ if(d.data && mes && d.data.startsWith(mes)){
   r[d.chefe]=(r[d.chefe]||0)+d.pontos;
  }
 });
-
 let ord=Object.entries(r).sort((a,b)=>b[1]-a[1]);
-
 mensalTabela.innerHTML="";
 ord.forEach((e,i)=>{
-mensalTabela.innerHTML+=`<tr><td>${i+1}</td><td>${e[0]}</td><td>${e[1]}</td></tr>`;
+mensalTabela.innerHTML+=`<tr><td>${i+1}</td><td>${e[0]}</td><td>${e[1].toFixed(1)}</td></tr>`;
 });
 };
 
-/* INDIVIDUAL */
 function rankingIndividual(){
 let r={};
-
 dados.forEach(d=>{
 [d.chefe,d.p1,d.p3,d.p4].forEach(p=>{
 if(!p)return;
 r[p]=(r[p]||0)+d.pontos/4;
 });
 });
-
 let ord=Object.entries(r).sort((a,b)=>b[1]-a[1]);
-
 individualTabela.innerHTML="";
 ord.forEach((e,i)=>{
 individualTabela.innerHTML+=`<tr><td>${i+1}</td><td>${e[0]}</td><td>${e[1].toFixed(1)}</td></tr>`;
@@ -254,7 +301,6 @@ document.getElementById(p).style.display="none";
 });
 document.getElementById(id).style.display="block";
 };
-
 </script>
 
 </body>
