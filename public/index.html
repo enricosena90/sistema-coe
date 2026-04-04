@@ -370,7 +370,9 @@ window.salvar=async()=>{
     explosivos:+explosivos.value||0,dinheiro:+dinheiro.value||0,municoes:+municoes.value||0
   };
 
-  let pontosBase = d.veiculos*25+d.drogas*15+d.fuzil*40+d.pistola*10+d.smg*15+d.explosivos*15+d.dinheiro*0.2+d.municoes*5;
+  let pontosBase = d.veiculos*25 + d.drogas*15 + d.fuzil*40 + d.pistola*10 + d.smg*15 + d.explosivos*15
+                 + Math.floor(d.dinheiro / 50000) * 50
+                 + d.municoes*5;
 
   let pontosTempo = 0;
   if(d.inicio && d.fim){
