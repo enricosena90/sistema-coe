@@ -100,7 +100,7 @@ button {
     transition:.2s;
 }
 button:hover {
-    background:#1c7b46;
+    background:#444;
     transform:scale(1.05);
 }
 
@@ -628,7 +628,7 @@ function graf(){
   if(grafico) grafico.destroy();
   grafico=new Chart(document.getElementById("grafico"),{
     type:"bar",
-    data:{labels:Object.keys(t),datasets:[{data:Object.values(t),backgroundColor:['#22c55e','#1c7b46','#16a34a','#4ade80','#22c55e','#1c7b46','#16a34a','#4ade80']}]},
+    data:{labels:Object.keys(t),datasets:[{data:Object.values(t),backgroundColor:['#888','#444','#666','#aaa','#888','#444','#666','#aaa']}]},
     options:{plugins:{legend:{display:false}}}
   });
 }
